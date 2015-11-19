@@ -1,0 +1,1 @@
+-e git+https://github.com/edx/opaque-keys.git@33f2b099e92957046a866a9b6d48a71c484bb475#egg=opaque_keys

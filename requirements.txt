@@ -1,0 +1,9 @@
+awscli
+docopt
+path.py
+pbr
+pip==1.5.6		# MIT // AN-4322
+python-dateutil
+pyyaml
+python-gnupg==0.3.6
+pymongo
