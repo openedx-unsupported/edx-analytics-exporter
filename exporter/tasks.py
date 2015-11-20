@@ -2,10 +2,7 @@
 
 import logging
 import os
-import re
 import subprocess
-import tempfile
-from urlparse import urlparse
 import distutils
 
 from opaque_keys.edx.keys import CourseKey
@@ -485,71 +482,6 @@ class DiscussionLinkTask(CourseTask, DjangoAdminTask):
     OUT = '{filename}'
 
 
-class StackExchangeTask(CourseTask, Task):
-    NAME = 'stack_exchange'
-    EXT = '7z'
-
-    @classmethod
-    def run(cls, filename, dry_run, **kwargs):
-        super(StackExchangeTask, cls).run(filename, dry_run, **kwargs)
-        se_bucket = kwargs['se_bucket']
-        domain = cls._get_discussion_link_domain(**kwargs)
-        if domain.endswith('.stackexchange.com'):
-            if dry_run:
-                print 'Acquire data dump for {domain} from bucket {se_bucket}'.format(
-                    domain=domain,
-                    se_bucket=se_bucket
-                )
-            else:
-                s3_filename = cls._get_most_recent_file(se_bucket, domain)
-                command = 'aws s3 cp s3://{se_bucket}/{s3_filename} {filename}'.format(
-                    se_bucket=se_bucket,
-                    s3_filename=s3_filename,
-                    filename=filename)
-                print 'Executing command {command}.'.format(command=command)
-                if s3_filename:
-                    try:
-                        execute_shell(command, **kwargs)
-                    except subprocess.CalledProcessError:
-                        error_message = 'Could not get S3 file {s3_filename}'.format(s3_filename=s3_filename)
-                        log.error(error_message)
-                        raise FatalTaskError(error_message)
-                else:
-                    log.warn('No data found for %s in bucket %s', domain, se_bucket)
-        else:
-            log.info('%s is not using Stack Exchange', kwargs['course'])
-
-    @classmethod
-    def _get_discussion_link_domain(cls, **kwargs):
-        with tempfile.NamedTemporaryFile() as discussion_link_file:
-            DiscussionLinkTask.run(filename=discussion_link_file.name, dry_run=False, **kwargs)
-            discussion_link_file.seek(0)
-            return urlparse(discussion_link_file.read()).netloc
-
-    @classmethod
-    def _get_most_recent_file(cls, se_bucket, domain):
-        try:
-            ls_output = subprocess.check_output(
-                'aws s3 ls s3://{se_bucket}'.format(se_bucket=se_bucket),
-                shell=True
-            )
-        except subprocess.CalledProcessError:
-            log.error('Could not get file listing for bucket %s', se_bucket)
-
-        filename_regex = r'dump_{domain}_(\d+)\\.'.format(domain=domain)
-        # Search for regex in each filename and filter out None values (which indicate no match)
-        filename_matches = filter(
-            None,
-            (re.search(filename_regex, filename) for filename in ls_output.split())
-        )
-        if filename_matches:
-            def extract_timestamp(filename_match):
-                return int(filename_match.group(1))
-            return max(filename_matches, key=extract_timestamp).string
-        else:
-            return None
-
-
 class FindAllCoursesTask(DjangoAdminTask):
     NAME = 'courses'
     EXT = 'txt'
@@ -610,7 +542,6 @@ DEFAULT_TASKS = [
     WikiArticleRevisionTask,
     UserCourseTagTask,
     ForumsTask,
-    StackExchangeTask,
     CourseStructureTask,
     CourseContentTask,
     OrgEmailOptInTask
