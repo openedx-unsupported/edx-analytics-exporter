@@ -8,6 +8,7 @@ import distutils
 from opaque_keys.edx.keys import CourseKey
 
 from exporter.util import NotSet
+from exporter.mysql_output_task import MysqlOutputTask
 
 
 log = logging.getLogger(__name__)
@@ -81,14 +82,6 @@ class SQLTask(Task):
     NAME = NotSet
     SQL = NotSet
     EXT = 'sql'
-    CMD = """
-    mysql -q
-      --execute="{query}"
-      --host={sql_host}
-      --user={sql_user}
-      --password="{sql_password}"
-      {sql_db} > {filename}
-    """
 
     @classmethod
     def run(cls, filename, dry_run, **kwargs):
@@ -98,13 +91,11 @@ class SQLTask(Task):
 
         log.debug(query)
 
-        cmd = clean_command(cls.CMD)
-        cmd = cmd.format(filename=filename, query=query, **kwargs)
-
         if dry_run:
             print 'SQL: {0}'.format(query)
         else:
-            execute_shell(cmd, **kwargs)
+            mysql_output_task = MysqlOutputTask(kwargs.get('sql_host'), kwargs.get('sql_user'), kwargs.get('sql_password'), kwargs.get('sql_db'), filename)
+            mysql_output_task.execute(query)
 
     @classmethod
     def get_query(cls, **kwargs):
