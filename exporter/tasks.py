@@ -48,6 +48,8 @@ class OrgTask(object):
 class CourseTask(object):
     """ Mixin class for course level tasks."""
 
+    SUBDIR = NotSet
+
     @classmethod
     def get_filename(cls, **kwargs):
         course_key = CourseKey.from_string(kwargs['course'])
@@ -61,7 +63,10 @@ class CourseTask(object):
             name=kwargs['name'],
             extension=cls.EXT
         )
-        return os.path.join(kwargs['work_dir'], filename)
+        if cls.SUBDIR != NotSet:
+            return os.path.join(kwargs['work_dir'], cls.SUBDIR, filename)
+        else:
+            return os.path.join(kwargs['work_dir'], filename)
 
 
 def clean_command(command):
@@ -444,9 +449,21 @@ class UserCourseTagTask(CourseTask, SQLTask):
     WHERE course_id='{course}'
     """
 
+
+class StudentAnonymousUserIDTask(CourseTask, SQLTask):
+    NAME = 'student_anonymoususerid'
+    SQL = """
+    SELECT * FROM student_anonymoususerid
+    WHERE course_id="{course}"
+    """
+
 # Start ORA2 Tables ==================
 
-class AssessmentAIClassifierTask(CourseTask, SQLTask):
+class ORA2CourseTask(CourseTask):
+    SUBDIR = "ora"
+
+
+class AssessmentAIClassifierTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_aiclassifier'
     SQL = """
     SELECT * FROM `assessment_aiclassifier`
@@ -454,7 +471,7 @@ class AssessmentAIClassifierTask(CourseTask, SQLTask):
                                   WHERE course_id="{course}")
     """
 
-class AssessmentAIClassifierSetTask(CourseTask, SQLTask):
+class AssessmentAIClassifierSetTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_aiclassifierset'
     SQL = """
     SELECT * FROM assessment_aiclassifierset
@@ -462,21 +479,21 @@ class AssessmentAIClassifierSetTask(CourseTask, SQLTask):
     """
 
 # Not used
-class AssessmentAIGradingWorkflowTask(CourseTask, SQLTask):
+class AssessmentAIGradingWorkflowTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_aigradingworkflow'
     SQL = """
     SELECT * FROM assessment_aigradingworkflow
     WHERE course_id="{course}"
     """
 
-class AssessmentAITrainingWorkflowTask(CourseTask, SQLTask):
+class AssessmentAITrainingWorkflowTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_aitrainingworkflow'
     SQL = """
     SELECT * FROM assessment_aitrainingworkflow
     WHERE course_id="{course}"
     """
 
-class AssessmentAITrainingWorkflowTrainingExamplesTask(CourseTask, SQLTask):
+class AssessmentAITrainingWorkflowTrainingExamplesTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_aitrainingworkflow_training_examples'
     SQL = """
     SELECT * FROM assessment_aitrainingworkflow_training_examples AS ate
@@ -484,7 +501,7 @@ class AssessmentAITrainingWorkflowTrainingExamplesTask(CourseTask, SQLTask):
                                       WHERE course_id="{course}")
     """
 
-class AssessmentAssessmentTask(CourseTask, SQLTask):
+class AssessmentAssessmentTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_assessment'
     SQL = """
     SELECT a.* FROM assessment_assessment AS a
@@ -493,7 +510,7 @@ class AssessmentAssessmentTask(CourseTask, SQLTask):
     WHERE si.course_id="{course}"
     """
 
-class AssessmentAssessmentFeedbackTask(CourseTask, SQLTask):
+class AssessmentAssessmentFeedbackTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_assessmentfeedback'
     SQL = """
     SELECT DISTINCT af.* FROM assessment_assessmentfeedback AS af
@@ -505,7 +522,7 @@ class AssessmentAssessmentFeedbackTask(CourseTask, SQLTask):
     WHERE si.course_id="{course}"
     """
 
-class AssessmentAssessmentFeedbackAssessmentsTask(CourseTask, SQLTask):
+class AssessmentAssessmentFeedbackAssessmentsTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_assessmentfeedback_assessments'
     SQL = """
     SELECT afa.* FROM assessment_assessmentfeedback_assessments AS afa
@@ -515,7 +532,7 @@ class AssessmentAssessmentFeedbackAssessmentsTask(CourseTask, SQLTask):
     WHERE si.course_id="{course}"
     """
 
-class AssessmentAssessmentFeedbackOptionsTask(CourseTask, SQLTask):
+class AssessmentAssessmentFeedbackOptionsTask(ORA2CourseTask, SQLTask):
     """
     Note the 's' in FeedbackOptions (as compared to below)
     """
@@ -531,7 +548,7 @@ class AssessmentAssessmentFeedbackOptionsTask(CourseTask, SQLTask):
     WHERE si.course_id="{course}"
     """
 
-class AssessmentAssessmentFeedbackOptionTask(CourseTask, SQLTask):
+class AssessmentAssessmentFeedbackOptionTask(ORA2CourseTask, SQLTask):
     """
     Note the lack of 's' in FeedbackOption (as compared to above)
     """
@@ -549,7 +566,7 @@ class AssessmentAssessmentFeedbackOptionTask(CourseTask, SQLTask):
     WHERE si.course_id="{course}"
     """
 
-class AssessmentAssessmentPartTask(CourseTask, SQLTask):
+class AssessmentAssessmentPartTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_assessmentpart'
     SQL = """
     SELECT ap.* FROM assessment_assessmentpart AS ap
@@ -559,7 +576,7 @@ class AssessmentAssessmentPartTask(CourseTask, SQLTask):
     WHERE si.course_id="{course}"
     """
 
-class AssessmentCriterionTask(CourseTask, SQLTask):
+class AssessmentCriterionTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_criterion'
     SQL = """
     SELECT c.* FROM assessment_criterion AS c
@@ -587,7 +604,7 @@ class AssessmentCriterionTask(CourseTask, SQLTask):
             WHERE acs.course_id="{course}")
     """
 
-class AssessmentCriterionOptionTask(CourseTask, SQLTask):
+class AssessmentCriterionOptionTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_criterionoption'
     SQL = """
     SELECT co.* FROM assessment_criterionoption AS co
@@ -617,14 +634,14 @@ class AssessmentCriterionOptionTask(CourseTask, SQLTask):
                 WHERE acs.course_id="{course}"))
     """
 
-class AssessmentPeerWorkflowTask(CourseTask, SQLTask):
+class AssessmentPeerWorkflowTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_peerworkflow'
     SQL = """
     SELECT * FROM assessment_peerworkflow
     WHERE course_id="{course}"
     """
 
-class AssessmentPeerWorkflowItemTask(CourseTask, SQLTask):
+class AssessmentPeerWorkflowItemTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_peerworkflowitem'
     SQL = """
     SELECT * FROM assessment_peerworkflowitem
@@ -632,7 +649,7 @@ class AssessmentPeerWorkflowItemTask(CourseTask, SQLTask):
                       WHERE course_id="{course}")
     """
 
-class AssessmentRubricTask(CourseTask, SQLTask):
+class AssessmentRubricTask(ORA2CourseTask, SQLTask):
     """
     There can be rubrics for assessments, training examples, AI Grading Workflows,
     AIClassifierSets.  There will likely be duplicates, but just UNION them all. (Is there
@@ -662,14 +679,14 @@ class AssessmentRubricTask(CourseTask, SQLTask):
         WHERE acs.course_id="{course}"
     """
 
-class AssessmentStudentTrainingWorkflow(CourseTask, SQLTask):
+class AssessmentStudentTrainingWorkflow(ORA2CourseTask, SQLTask):
     NAME = 'assessment_studenttrainingworkflow'
     SQL = """
     SELECT * FROM assessment_studenttrainingworkflow
     WHERE course_id="{course}"
     """
 
-class AssessmentStudentTrainingWorkflowItemTask(CourseTask, SQLTask):
+class AssessmentStudentTrainingWorkflowItemTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_studenttrainingworkflowitem'
     SQL = """
     SELECT * FROM assessment_studenttrainingworkflowitem
@@ -678,7 +695,7 @@ class AssessmentStudentTrainingWorkflowItemTask(CourseTask, SQLTask):
     """
 
 
-class AssessmentTrainingExampleTask(CourseTask, SQLTask):
+class AssessmentTrainingExampleTask(ORA2CourseTask, SQLTask):
     """
     This can be used from AITrainingWorkflow or StudentTrainingWOrkflowItem, so
     UNION the two.
@@ -698,7 +715,7 @@ class AssessmentTrainingExampleTask(CourseTask, SQLTask):
         WHERE stw.course_id="{course}"
     """
 
-class AssessmentTrainingExampleOptionsSelectedTask(CourseTask, SQLTask):
+class AssessmentTrainingExampleOptionsSelectedTask(ORA2CourseTask, SQLTask):
     NAME = 'assessment_trainingexample_options_selected'
     SQL = """
     SELECT tos.* FROM assessment_trainingexample_options_selected AS tos
@@ -717,7 +734,7 @@ class AssessmentTrainingExampleOptionsSelectedTask(CourseTask, SQLTask):
             WHERE stw.course_id="{course}")
     """
 
-class SubmissionsScoreTask(CourseTask, SQLTask):
+class SubmissionsScoreTask(ORA2CourseTask, SQLTask):
     NAME = 'submissions_score'
     SQL = """
     SELECT * FROM submissions_score
@@ -725,7 +742,7 @@ class SubmissionsScoreTask(CourseTask, SQLTask):
                               WHERE course_id="{course}")
     """
 
-class SubmissionsScoreSummaryTask(CourseTask, SQLTask):
+class SubmissionsScoreSummaryTask(ORA2CourseTask, SQLTask):
     NAME = 'submissions_scoresummary'
     SQL = """
     SELECT * FROM submissions_scoresummary
@@ -733,14 +750,14 @@ class SubmissionsScoreSummaryTask(CourseTask, SQLTask):
                               WHERE course_id="{course}")
     """
 
-class SubmissionsStudentItemTask(CourseTask, SQLTask):
+class SubmissionsStudentItemTask(ORA2CourseTask, SQLTask):
     NAME = 'submissions_studentitem'
     SQL = """
     SELECT * FROM submissions_studentitem
     WHERE course_id="{course}"
     """
 
-class SubmissionsSubmissionTask(CourseTask, SQLTask):
+class SubmissionsSubmissionTask(ORA2CourseTask, SQLTask):
     NAME = 'submissions_submission'
     SQL = """
     SELECT * FROM submissions_submission
@@ -748,26 +765,19 @@ class SubmissionsSubmissionTask(CourseTask, SQLTask):
                               WHERE course_id="{course}")
     """
 
-class WorkflowAssessmentWorkflowTask(CourseTask, SQLTask):
+class WorkflowAssessmentWorkflowTask(ORA2CourseTask, SQLTask):
     NAME = 'workflow_assessmentworkflow'
     SQL = """
     SELECT * FROM workflow_assessmentworkflow
     WHERE course_id="{course}"
     """
 
-class WorkflowAssessmentWorkflowStepTask(CourseTask, SQLTask):
+class WorkflowAssessmentWorkflowStepTask(ORA2CourseTask, SQLTask):
     NAME = 'workflow_assessmentworkflowstep'
     SQL = """
     SELECT * FROM workflow_assessmentworkflowstep
     WHERE workflow_id IN (SELECT id FROM workflow_assessmentworkflow
                           WHERE course_id="{course}")
-    """
-
-class StudentAnonymousUserIDTask(CourseTask, SQLTask):
-    NAME = 'student_anonymoususerid'
-    SQL = """
-    SELECT * FROM student_anonymoususerid
-    WHERE course_id="{course}"
     """
 
 # End ORA2 Tables ==================
