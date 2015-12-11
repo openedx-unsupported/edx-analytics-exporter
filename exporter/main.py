@@ -125,7 +125,11 @@ def run_tasks(task_cls, **kwargs):
 
         log.info("Running task %s", task.__name__)
 
+        # Get filename, and make sure its directory exists (in case it's a subdirectory).
         filename = task.get_filename(**kwargs)
+        file_dir = os.path.dirname(filename)
+        if not os.path.isdir(file_dir):
+            os.mkdir(file_dir)
 
         try:
             with logging_streams_on_failure(task.__name__) as (output_file, error_file):
@@ -239,7 +243,7 @@ def upload_data(config, filepath):
 
     log.info('Uploading file %s to %s', filepath, target)
 
-    cmd = 'aws s3 cp {filepath} {target}'
+    cmd = 'aws s3 cp --acl bucket-owner-full-control {filepath} {target}'
     cmd = cmd.format(filepath=filepath, target=target)
 
     if not config['dry_run']:

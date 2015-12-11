@@ -48,6 +48,8 @@ class OrgTask(object):
 class CourseTask(object):
     """ Mixin class for course level tasks."""
 
+    SUBDIR = NotSet
+
     @classmethod
     def get_filename(cls, **kwargs):
         course_key = CourseKey.from_string(kwargs['course'])
@@ -61,7 +63,10 @@ class CourseTask(object):
             name=kwargs['name'],
             extension=cls.EXT
         )
-        return os.path.join(kwargs['work_dir'], filename)
+        if cls.SUBDIR != NotSet:
+            return os.path.join(kwargs['work_dir'], cls.SUBDIR, filename)
+        else:
+            return os.path.join(kwargs['work_dir'], filename)
 
 
 def clean_command(command):
@@ -445,6 +450,338 @@ class UserCourseTagTask(CourseTask, SQLTask):
     """
 
 
+class StudentAnonymousUserIDTask(CourseTask, SQLTask):
+    NAME = 'student_anonymoususerid'
+    SQL = """
+    SELECT * FROM student_anonymoususerid
+    WHERE course_id="{course}"
+    """
+
+# Start ORA2 Tables ==================
+
+class ORA2CourseTask(CourseTask):
+    SUBDIR = "ora"
+
+
+class AssessmentAIClassifierTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_aiclassifier'
+    SQL = """
+    SELECT * FROM `assessment_aiclassifier`
+    WHERE classifier_set_id IN (SELECT id FROM assessment_aiclassifierset
+                                  WHERE course_id="{course}")
+    """
+
+class AssessmentAIClassifierSetTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_aiclassifierset'
+    SQL = """
+    SELECT * FROM assessment_aiclassifierset
+    WHERE course_id="{course}"
+    """
+
+# Not used
+class AssessmentAIGradingWorkflowTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_aigradingworkflow'
+    SQL = """
+    SELECT * FROM assessment_aigradingworkflow
+    WHERE course_id="{course}"
+    """
+
+class AssessmentAITrainingWorkflowTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_aitrainingworkflow'
+    SQL = """
+    SELECT * FROM assessment_aitrainingworkflow
+    WHERE course_id="{course}"
+    """
+
+class AssessmentAITrainingWorkflowTrainingExamplesTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_aitrainingworkflow_training_examples'
+    SQL = """
+    SELECT * FROM assessment_aitrainingworkflow_training_examples AS ate
+    WHERE ate.aitrainingworkflow_id IN (SELECT id FROM assessment_aitrainingworkflow
+                                      WHERE course_id="{course}")
+    """
+
+class AssessmentAssessmentTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_assessment'
+    SQL = """
+    SELECT a.* FROM assessment_assessment AS a
+    LEFT JOIN submissions_submission AS s ON a.submission_uuid=s.uuid
+    LEFT JOIN submissions_studentitem AS si ON s.student_item_id=si.id
+    WHERE si.course_id="{course}"
+    """
+
+class AssessmentAssessmentFeedbackTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_assessmentfeedback'
+    SQL = """
+    SELECT DISTINCT af.* FROM assessment_assessmentfeedback AS af
+    LEFT JOIN assessment_assessmentfeedback_assessments AS afa
+           ON af.id=afa.assessmentfeedback_id
+    LEFT JOIN assessment_assessment AS a ON afa.assessment_id=a.id
+    LEFT JOIN submissions_submission AS s ON a.submission_uuid=s.uuid
+    LEFT JOIN submissions_studentitem AS si ON s.student_item_id=si.id
+    WHERE si.course_id="{course}"
+    """
+
+class AssessmentAssessmentFeedbackAssessmentsTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_assessmentfeedback_assessments'
+    SQL = """
+    SELECT afa.* FROM assessment_assessmentfeedback_assessments AS afa
+    LEFT JOIN assessment_assessment AS a ON afa.assessment_id=a.id
+    LEFT JOIN submissions_submission AS s ON a.submission_uuid=s.uuid
+    LEFT JOIN submissions_studentitem AS si ON s.student_item_id=si.id
+    WHERE si.course_id="{course}"
+    """
+
+class AssessmentAssessmentFeedbackOptionsTask(ORA2CourseTask, SQLTask):
+    """
+    Note the 's' in FeedbackOptions (as compared to below)
+    """
+    NAME = 'assessment_assessmentfeedback_options'
+    SQL = """
+    SELECT DISTINCT afo.* FROM assessment_assessmentfeedback_options AS afo
+    LEFT JOIN assessment_assessmentfeedback AS af ON afo.assessmentfeedback_id=af.id
+    LEFT JOIN assessment_assessmentfeedback_assessments AS afa
+           ON af.id=afa.assessmentfeedback_id
+    LEFT JOIN assessment_assessment AS a ON afa.assessment_id=a.id
+    LEFT JOIN submissions_submission AS s ON a.submission_uuid=s.uuid
+    LEFT JOIN submissions_studentitem AS si ON s.student_item_id=si.id
+    WHERE si.course_id="{course}"
+    """
+
+class AssessmentAssessmentFeedbackOptionTask(ORA2CourseTask, SQLTask):
+    """
+    Note the lack of 's' in FeedbackOption (as compared to above)
+    """
+    NAME = 'assessment_assessmentfeedbackoption'
+    SQL = """
+    SELECT DISTINCT aafo.* FROM assessment_assessmentfeedbackoption as aafo
+    LEFT JOIN assessment_assessmentfeedback_options AS afo
+           ON aafo.id=afo.assessmentfeedbackoption_id
+    LEFT JOIN assessment_assessmentfeedback AS af ON afo.assessmentfeedback_id=af.id
+    LEFT JOIN assessment_assessmentfeedback_assessments AS afa
+           ON af.id=afa.assessmentfeedback_id
+    LEFT JOIN assessment_assessment AS a ON afa.assessment_id=a.id
+    LEFT JOIN submissions_submission AS s ON a.submission_uuid=s.uuid
+    LEFT JOIN submissions_studentitem AS si ON s.student_item_id=si.id
+    WHERE si.course_id="{course}"
+    """
+
+class AssessmentAssessmentPartTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_assessmentpart'
+    SQL = """
+    SELECT ap.* FROM assessment_assessmentpart AS ap
+    LEFT JOIN assessment_assessment AS a ON ap.assessment_id=a.id
+    LEFT JOIN submissions_submission AS s ON a.submission_uuid=s.uuid
+    LEFT JOIN submissions_studentitem AS si ON s.student_item_id=si.id
+    WHERE si.course_id="{course}"
+    """
+
+class AssessmentCriterionTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_criterion'
+    SQL = """
+    SELECT c.* FROM assessment_criterion AS c
+    WHERE c.rubric_id IN (
+        SELECT DISTINCT rub.id FROM assessment_rubric AS rub
+            LEFT JOIN assessment_assessment AS a ON rub.id=a.rubric_id
+            LEFT JOIN submissions_submission AS s ON a.submission_uuid=s.uuid
+            LEFT JOIN submissions_studentitem AS si ON s.student_item_id=si.id
+            WHERE si.course_id="{course}"
+        UNION
+        SELECT DISTINCT rub.id FROM assessment_rubric AS rub
+            LEFT JOIN assessment_trainingexample AS te ON rub.id=te.rubric_id
+            LEFT JOIN assessment_aitrainingworkflow_training_examples AS ate
+                   ON te.id=ate.trainingexample_id
+            LEFT JOIN assessment_aitrainingworkflow AS tw
+                   ON ate.aitrainingworkflow_id=tw.id
+            WHERE tw.course_id="{course}"
+        UNION
+        SELECT DISTINCT rub.id FROM assessment_rubric AS rub
+            LEFT JOIN assessment_aigradingworkflow AS aigw ON rub.id=aigw.rubric_id
+            WHERE aigw.course_id="{course}"
+        UNION
+        SELECT DISTINCT rub.id FROM assessment_rubric AS rub
+            LEFT JOIN assessment_aiclassifierset AS acs ON rub.id=acs.rubric_id
+            WHERE acs.course_id="{course}")
+    """
+
+class AssessmentCriterionOptionTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_criterionoption'
+    SQL = """
+    SELECT co.* FROM assessment_criterionoption AS co
+    WHERE co.criterion_id IN (
+        SELECT c.id FROM assessment_criterion AS c
+        WHERE c.rubric_id IN (
+            SELECT DISTINCT rub.id FROM assessment_rubric AS rub
+                LEFT JOIN assessment_assessment AS a ON rub.id=a.rubric_id
+                LEFT JOIN submissions_submission AS s ON a.submission_uuid=s.uuid
+                LEFT JOIN submissions_studentitem AS si ON s.student_item_id=si.id
+                WHERE si.course_id="{course}"
+            UNION
+            SELECT DISTINCT rub.id FROM assessment_rubric AS rub
+                LEFT JOIN assessment_trainingexample AS te ON rub.id=te.rubric_id
+                LEFT JOIN assessment_aitrainingworkflow_training_examples AS ate
+                       ON te.id=ate.trainingexample_id
+                LEFT JOIN assessment_aitrainingworkflow AS tw
+                       ON ate.aitrainingworkflow_id=tw.id
+                WHERE tw.course_id="{course}"
+            UNION
+            SELECT DISTINCT rub.id FROM assessment_rubric AS rub
+                LEFT JOIN assessment_aigradingworkflow AS aigw ON rub.id=aigw.rubric_id
+                WHERE aigw.course_id="{course}"
+            UNION
+                SELECT DISTINCT rub.id FROM assessment_rubric AS rub
+                LEFT JOIN assessment_aiclassifierset AS acs ON rub.id=acs.rubric_id
+                WHERE acs.course_id="{course}"))
+    """
+
+class AssessmentPeerWorkflowTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_peerworkflow'
+    SQL = """
+    SELECT * FROM assessment_peerworkflow
+    WHERE course_id="{course}"
+    """
+
+class AssessmentPeerWorkflowItemTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_peerworkflowitem'
+    SQL = """
+    SELECT * FROM assessment_peerworkflowitem
+    WHERE assessment_id IN (SELECT id FROM assessment_peerworkflow
+                      WHERE course_id="{course}")
+    """
+
+class AssessmentRubricTask(ORA2CourseTask, SQLTask):
+    """
+    There can be rubrics for assessments, training examples, AI Grading Workflows,
+    AIClassifierSets.  There will likely be duplicates, but just UNION them all. (Is there
+    a shorter way to do this?)
+    """
+    NAME = 'assessment_rubric'
+    SQL = """
+    SELECT DISTINCT rub.* FROM assessment_rubric AS rub
+        LEFT JOIN assessment_assessment AS a ON rub.id=a.rubric_id
+        LEFT JOIN submissions_submission AS s ON a.submission_uuid=s.uuid
+        LEFT JOIN submissions_studentitem AS si ON s.student_item_id=si.id
+        WHERE si.course_id="{course}"
+    UNION
+    SELECT DISTINCT rub.* FROM assessment_rubric AS rub
+        LEFT JOIN assessment_trainingexample AS te ON rub.id=te.rubric_id
+        LEFT JOIN assessment_aitrainingworkflow_training_examples AS ate
+               ON te.id=ate.trainingexample_id
+        LEFT JOIN assessment_aitrainingworkflow AS tw ON ate.aitrainingworkflow_id=tw.id
+        WHERE tw.course_id="{course}"
+    UNION
+    SELECT DISTINCT rub.* FROM assessment_rubric AS rub
+        LEFT JOIN assessment_aigradingworkflow AS aigw ON rub.id=aigw.rubric_id
+        WHERE aigw.course_id="{course}"
+    UNION
+    SELECT DISTINCT rub.* FROM assessment_rubric AS rub
+        LEFT JOIN assessment_aiclassifierset AS acs ON rub.id=acs.rubric_id
+        WHERE acs.course_id="{course}"
+    """
+
+class AssessmentStudentTrainingWorkflow(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_studenttrainingworkflow'
+    SQL = """
+    SELECT * FROM assessment_studenttrainingworkflow
+    WHERE course_id="{course}"
+    """
+
+class AssessmentStudentTrainingWorkflowItemTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_studenttrainingworkflowitem'
+    SQL = """
+    SELECT * FROM assessment_studenttrainingworkflowitem
+    WHERE workflow_id IN (SELECT id FROM assessment_studenttrainingworkflow
+                          WHERE course_id="{course}")
+    """
+
+
+class AssessmentTrainingExampleTask(ORA2CourseTask, SQLTask):
+    """
+    This can be used from AITrainingWorkflow or StudentTrainingWOrkflowItem, so
+    UNION the two.
+    """
+    NAME = 'assessment_trainingexample'
+    SQL = """
+    SELECT DISTINCT te.* FROM assessment_trainingexample AS te
+        LEFT JOIN assessment_aitrainingworkflow_training_examples AS ate
+               ON te.id=ate.trainingexample_id
+        LEFT JOIN assessment_aitrainingworkflow AS tw ON ate.aitrainingworkflow_id=tw.id
+        WHERE tw.course_id="{course}"
+    UNION
+    SELECT DISTINCT te.*  FROM assessment_trainingexample AS te
+        LEFT JOIN assessment_studenttrainingworkflowitem AS stwi
+               ON te.id=stwi.training_example_id
+        LEFT JOIN assessment_studenttrainingworkflow AS stw ON stwi.workflow_id=stw.id
+        WHERE stw.course_id="{course}"
+    """
+
+class AssessmentTrainingExampleOptionsSelectedTask(ORA2CourseTask, SQLTask):
+    NAME = 'assessment_trainingexample_options_selected'
+    SQL = """
+    SELECT tos.* FROM assessment_trainingexample_options_selected AS tos
+    WHERE tos.trainingexample_id IN (
+        SELECT DISTINCT te.id FROM assessment_trainingexample AS te
+            LEFT JOIN assessment_aitrainingworkflow_training_examples AS ate
+                   ON te.id=ate.trainingexample_id
+            LEFT JOIN assessment_aitrainingworkflow AS tw
+                   ON ate.aitrainingworkflow_id=tw.id
+            WHERE tw.course_id="{course}"
+        UNION
+        SELECT DISTINCT te.id  FROM assessment_trainingexample AS te
+            LEFT JOIN assessment_studenttrainingworkflowitem AS stwi
+                   ON te.id=stwi.training_example_id
+            LEFT JOIN assessment_studenttrainingworkflow AS stw ON stwi.workflow_id=stw.id
+            WHERE stw.course_id="{course}")
+    """
+
+class SubmissionsScoreTask(ORA2CourseTask, SQLTask):
+    NAME = 'submissions_score'
+    SQL = """
+    SELECT * FROM submissions_score
+    WHERE student_item_id IN (SELECT id FROM submissions_studentitem
+                              WHERE course_id="{course}")
+    """
+
+class SubmissionsScoreSummaryTask(ORA2CourseTask, SQLTask):
+    NAME = 'submissions_scoresummary'
+    SQL = """
+    SELECT * FROM submissions_scoresummary
+    WHERE student_item_id IN (SELECT id FROM submissions_studentitem
+                              WHERE course_id="{course}")
+    """
+
+class SubmissionsStudentItemTask(ORA2CourseTask, SQLTask):
+    NAME = 'submissions_studentitem'
+    SQL = """
+    SELECT * FROM submissions_studentitem
+    WHERE course_id="{course}"
+    """
+
+class SubmissionsSubmissionTask(ORA2CourseTask, SQLTask):
+    NAME = 'submissions_submission'
+    SQL = """
+    SELECT * FROM submissions_submission
+    WHERE student_item_id IN (SELECT id FROM submissions_studentitem
+                              WHERE course_id="{course}")
+    """
+
+class WorkflowAssessmentWorkflowTask(ORA2CourseTask, SQLTask):
+    NAME = 'workflow_assessmentworkflow'
+    SQL = """
+    SELECT * FROM workflow_assessmentworkflow
+    WHERE course_id="{course}"
+    """
+
+class WorkflowAssessmentWorkflowStepTask(ORA2CourseTask, SQLTask):
+    NAME = 'workflow_assessmentworkflowstep'
+    SQL = """
+    SELECT * FROM workflow_assessmentworkflowstep
+    WHERE workflow_id IN (SELECT id FROM workflow_assessmentworkflow
+                          WHERE course_id="{course}")
+    """
+
+# End ORA2 Tables ==================
+
 class ForumsTask(CourseTask, MongoTask):
     NAME = ''
     QUERY = '{{"course_id": "{course}"}}'
@@ -535,5 +872,34 @@ DEFAULT_TASKS = [
     ForumsTask,
     CourseStructureTask,
     CourseContentTask,
-    OrgEmailOptInTask
+    OrgEmailOptInTask,
+    # To avoid confusing data czars while AI isn't usable, let's not export all the AI
+    # tables. Leaving list here so we don't miss any when we're ready to export these.
+    # AssessmentAIClassifierTask,
+    # AssessmentAIClassifierSetTask,
+    # AssessmentAIGradingWorkflowTask,
+    # AssessmentAITrainingWorkflowTask,
+    # AssessmentAITrainingWorkflowTrainingExamplesTask,
+    AssessmentAssessmentTask,
+    AssessmentAssessmentFeedbackTask,
+    AssessmentAssessmentFeedbackAssessmentsTask,
+    AssessmentAssessmentFeedbackOptionsTask,
+    AssessmentAssessmentFeedbackOptionTask,
+    AssessmentAssessmentPartTask,
+    AssessmentCriterionTask,
+    AssessmentCriterionOptionTask,
+    AssessmentPeerWorkflowTask,
+    AssessmentPeerWorkflowItemTask,
+    AssessmentRubricTask,
+    AssessmentStudentTrainingWorkflow,
+    AssessmentStudentTrainingWorkflowItemTask,
+    AssessmentTrainingExampleTask,
+    AssessmentTrainingExampleOptionsSelectedTask,
+    SubmissionsScoreTask,
+    SubmissionsScoreSummaryTask,
+    SubmissionsStudentItemTask,
+    SubmissionsSubmissionTask,
+    WorkflowAssessmentWorkflowTask,
+    WorkflowAssessmentWorkflowStepTask,
+    StudentAnonymousUserIDTask,
 ]
