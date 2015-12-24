@@ -7,4 +7,3 @@ python-dateutil
 pyyaml
 python-gnupg==0.3.6
 pymongo
-mysql-connector-python==1.2.2
