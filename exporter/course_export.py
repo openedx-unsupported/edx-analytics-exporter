@@ -101,8 +101,8 @@ def export_course_data(config, destination, environment):
 def upload_files(config, results_directory):
     bucket = config['output_bucket']
     prefix = config['output_prefix'] or ''
-
     filename_safe_course_id = get_filename_safe_course_id(config['course'])
+    output_date = str(datetime.date.today())
 
     for filename in os.listdir(results_directory):
         filepath = os.path.join(results_directory, filename)
@@ -111,7 +111,7 @@ def upload_files(config, results_directory):
             bucket=bucket,
             prefix=prefix,
             course=filename_safe_course_id,
-            date=str(datetime.date.today()),
+            date=output_date,
             name=filename
         )
 
