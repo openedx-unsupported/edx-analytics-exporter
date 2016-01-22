@@ -4,13 +4,13 @@
 Export course data.
 
 Usage:
-  course-exporter [options] <config> [--env=<environment>...] [--cid=<course>...] [--task=<task>...]
+  course-exporter [options] <config> [--env=<environment>...] [--course=<course>...] [--task=<task>...]
 
 Arguments:
   <config>                   YAML configuration file.
   --env=<environment>        Select environment. Can be specified multiple times.
   --task=<task>              Select task. Can be specified multiple times.
-  --cid=<course>             Select course. Can be specified multiple times.
+  --course=<course>             Select course. Can be specified multiple times.
 
 Options:
   -h --help                  Show this screen.
@@ -58,7 +58,7 @@ def main():
 
     courses_with_env = get_courses_with_env(general_config)
 
-    for course in general_config['values']['cid']:
+    for course in general_config['values']['course']:
         config = get_config_for_course(general_config, course)
 
         with make_course_directory(config, course) as temp_directory:
@@ -67,7 +67,7 @@ def main():
 
 def get_courses_with_env(config):
     courses_with_env = {}
-    courses = config['values']['cid']
+    courses = config['values']['course']
 
     for environment in config['environments']:
          kwargs = merge(config['values'], config['environments'][environment])
