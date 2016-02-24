@@ -52,12 +52,10 @@ class CourseTask(object):
 
     @classmethod
     def get_filename(cls, **kwargs):
-        course_key = CourseKey.from_string(kwargs['course'])
-
         template = "{course}-{task}-{name}.{extension}"
 
         filename = template.format(
-            course='-'.join((course_key.org, course_key.course, course_key.run)),
+            course=cls.get_course_name(kwargs['course'],
             task=cls.NAME,
             environment=kwargs['environment'],
             name=kwargs['name'],
@@ -67,6 +65,16 @@ class CourseTask(object):
             return os.path.join(kwargs['work_dir'], cls.SUBDIR, filename)
         else:
             return os.path.join(kwargs['work_dir'], filename)
+
+    @classmethod
+    def get_course_name(cls, course_id):
+        course_key = CourseKey.from_string(course_id)
+        if hasattr(course_key, 'ccx'):
+            course = '-'.join((course_key.org, course_key.course, course_key.run, 'ccx', course_key.ccx))
+        else:
+            course = '-'.join((course_key.org, course_key.course, course_key.run))
+
+        return course
 
 
 def clean_command(command):
@@ -793,10 +801,8 @@ class ForumsTask(CourseTask, MongoTask):
         # edge: "{course}-edge.{extension}"
         template = "{course}-{environment}.{extension}"
 
-        course_key = CourseKey.from_string(kwargs['course'])
-
         filename = template.format(
-            course='-'.join((course_key.org, course_key.course, course_key.run)),
+            course=cls.get_course_name(kwargs['course']),
             environment=kwargs['environment'],
             extension=cls.EXT
         )
