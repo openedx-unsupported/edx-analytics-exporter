@@ -55,7 +55,7 @@ class CourseTask(object):
         template = "{course}-{task}-{name}.{extension}"
 
         filename = template.format(
-            course=cls.get_course_name(kwargs['course'],
+            course=cls.get_course_name(kwargs['course']),
             task=cls.NAME,
             environment=kwargs['environment'],
             name=kwargs['name'],
