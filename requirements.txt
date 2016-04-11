@@ -1,5 +1,7 @@
 awscli
 docopt
+edx-ccx-keys
+edx-opaque-keys
 path.py
 pbr
 pip==1.5.6		# MIT // AN-4322
