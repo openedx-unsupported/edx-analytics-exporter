@@ -809,13 +809,6 @@ class ForumsTask(CourseTask, MongoTask):
         return os.path.join(kwargs['work_dir'], filename)
 
 
-class DiscussionLinkTask(CourseTask, DjangoAdminTask):
-    NAME = 'discussion_link'
-    COMMAND = 'get_discussion_link'
-    ARGS = '{course}'
-    OUT = '{filename}'
-
-
 class FindAllCoursesTask(DjangoAdminTask):
     NAME = 'courses'
     EXT = 'txt'
@@ -835,9 +828,19 @@ class CourseStructureTask(CourseTask, DjangoAdminTask):
 class CourseContentTask(CourseTask, DjangoAdminTask):
     NAME = 'course'
     EXT = 'xml.tar.gz'
-    COMMAND = 'export_course'
-    ARGS = '{course} -'
+    COMMAND = 'export_olx'
+    ARGS = '{course}'
     OUT = '{filename}'
+    VARS = 'CONFIG_ROOT={django_config} SERVICE_VARIANT=cms'
+    # Change CMD to use django_cms_settings.
+    CMD = """
+    sudo -E -u {django_user} {variables}
+      {django_admin} {command}
+      --settings={django_cms_settings}
+      --pythonpath={django_pythonpath}
+      {arguments}
+    > {output}
+    """
 
 
 class OrgEmailOptInTask(OrgTask, DjangoAdminTask):
