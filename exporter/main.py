@@ -276,7 +276,7 @@ def get_org_courses(organization, **kwargs):
     if courses:
         log.info('Courses for %r: %r', organization_names, courses)
     else:
-        log.warning('No courses found for %r', organization_names)
+        log.info('No courses found for %r', organization_names)
 
     return courses
 
