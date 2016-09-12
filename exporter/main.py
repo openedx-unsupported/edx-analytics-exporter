@@ -57,7 +57,7 @@ from exporter.tasks import FatalTaskError
 from exporter.tasks import DEFAULT_TASKS
 from exporter.tasks import OrgEmailOptInTask
 from exporter.util import make_temp_directory, with_temp_directory
-from exporter.util import filter_keys, memoize
+from exporter.util import filter_keys, memoize, execute_shell
 from exporter.util import logging_streams_on_failure
 
 
@@ -65,6 +65,9 @@ log = logging.getLogger(__name__)
 
 
 # pylint: disable=missing-docstring
+
+
+MAX_TRIES_FOR_DATA_UPLOAD = 5
 
 
 def main():
@@ -247,7 +250,8 @@ def upload_data(config, filepath):
     cmd = cmd.format(filepath=filepath, target=target)
 
     if not config['dry_run']:
-        subprocess.check_call(cmd, shell=True)
+        local_kwargs = {'max_tries': MAX_TRIES_FOR_DATA_UPLOAD}
+        execute_shell(cmd, **local_kwargs)
     else:
         log.info('cmd: %s', cmd)
 

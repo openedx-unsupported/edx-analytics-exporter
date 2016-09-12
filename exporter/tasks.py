@@ -4,17 +4,15 @@ import logging
 import os
 import subprocess
 import distutils
-import time
 
 from opaque_keys.edx.keys import CourseKey
 
-from exporter.util import NotSet
+from exporter.util import NotSet, execute_shell
 from exporter.mysql_query import MysqlDumpQueryToTSV
 
 
 log = logging.getLogger(__name__)
 
-BASE_RETRY_DELAY_IN_SECONDS = 5
 MAX_TRIES_FOR_MARKER_FILE_CHECK = 5
 
 
@@ -83,40 +81,6 @@ class CourseTask(object):
 
 def clean_command(command):
     return ' '.join(l.strip() for l in command.split('\n')).strip()
-
-
-def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
-    try:
-        return_val = subprocess.check_call(cmd, shell=True, **additional_args)
-        return return_val
-    except subprocess.CalledProcessError as exception:
-        if attempt >= max_tries:
-            raise
-
-        log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
-        attempt += 1
-        exponential_delay = BASE_RETRY_DELAY_IN_SECONDS * (2 ** attempt)
-        log.warning("Waiting %d seconds before attempting retry %d", exponential_delay, attempt)
-        time.sleep(exponential_delay)
-
-        log.warning("Retrying command: attempt %d", attempt)
-        return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
-
-
-def execute_shell(cmd, **kwargs):
-    additional_args = {}
-    if 'stdout_file' in kwargs:
-        additional_args['stdout'] = kwargs['stdout_file']
-    if 'stderr_file' in kwargs:
-        additional_args['stderr'] = kwargs['stderr_file']
-
-    attempt = 1
-    if 'max_tries' in kwargs:
-        max_tries = kwargs['max_tries']
-    else:
-        max_tries = 1
-
-    return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
 
 
 class SQLTask(Task):

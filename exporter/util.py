@@ -2,12 +2,13 @@
 
 import atexit
 from contextlib import contextmanager
-import os.path
 import functools
-import shutil
 import logging
+import os.path
+import shutil
+import subprocess
 import tempfile
-
+import time
 
 log = logging.getLogger(__name__)
 
@@ -143,3 +144,43 @@ def log_file_contents(log_func, file_handle):
     file_handle.seek(0)
     for line in file_handle:
         log_func(line.strip())
+
+
+# Shell retries
+
+
+BASE_RETRY_DELAY_IN_SECONDS = 5
+
+
+def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
+    try:
+        return_val = subprocess.check_call(cmd, shell=True, **additional_args)
+        return return_val
+    except subprocess.CalledProcessError as exception:
+        if attempt >= max_tries:
+            raise
+
+        log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
+        attempt += 1
+        exponential_delay = BASE_RETRY_DELAY_IN_SECONDS * (2 ** attempt)
+        log.warning("Waiting %d seconds before attempting retry %d", exponential_delay, attempt)
+        time.sleep(exponential_delay)
+
+        log.warning("Retrying command: attempt %d", attempt)
+        return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
+
+
+def execute_shell(cmd, **kwargs):
+    additional_args = {}
+    if 'stdout_file' in kwargs:
+        additional_args['stdout'] = kwargs['stdout_file']
+    if 'stderr_file' in kwargs:
+        additional_args['stderr'] = kwargs['stderr_file']
+
+    attempt = 1
+    if 'max_tries' in kwargs:
+        max_tries = kwargs['max_tries']
+    else:
+        max_tries = 1
+
+    return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
