@@ -96,6 +96,7 @@ def update_environments(config):
 
             # different settings for edge
             if env == 'edge':
+                data['sql_password'] = tokens.get('rds_pass_edge')
                 data['mongo_user'] = tokens.get('mongo_user_edge')
                 data['mongo_password'] = tokens.get('mongo_pass_edge')
 
