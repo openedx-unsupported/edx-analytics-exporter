@@ -14,6 +14,7 @@ from exporter.mysql_query import MysqlDumpQueryToTSV
 log = logging.getLogger(__name__)
 
 MAX_TRIES_FOR_MARKER_FILE_CHECK = 5
+MAX_TRIES_FOR_COPY_FILE_FROM_S3 = 5
 
 
 class FatalTaskError(Exception):
@@ -268,7 +269,10 @@ class CopyS3FileTask(Task):
                         src=s3_source_filename,
                         dest=filename
                     )
-                    execute_shell(cmd, **kwargs)
+                    # Define retries here, to recover from temporary outages when calling S3 to copy files.
+                    local_kwargs = dict(**kwargs)
+                    local_kwargs['max_tries'] = MAX_TRIES_FOR_COPY_FILE_FROM_S3
+                    execute_shell(cmd, **local_kwargs)
                 except subprocess.CalledProcessError:
                     log.error('Unable to copy %s to %s', s3_source_filename, filename)
                     raise

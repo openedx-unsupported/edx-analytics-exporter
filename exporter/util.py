@@ -163,10 +163,10 @@ def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
         log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
         attempt += 1
         exponential_delay = BASE_RETRY_DELAY_IN_SECONDS * (2 ** attempt)
-        log.warning("Waiting %d seconds before attempting retry %d", exponential_delay, attempt)
+        log.info("Waiting %d seconds before attempting retry %d", exponential_delay, attempt)
         time.sleep(exponential_delay)
 
-        log.warning("Retrying command: attempt %d", attempt)
+        log.info("Retrying command: attempt %d", attempt)
         return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
 
 
