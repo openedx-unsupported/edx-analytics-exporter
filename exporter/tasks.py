@@ -447,6 +447,25 @@ class WikiArticleRevisionTask(CourseWikiTask, SQLTask):
     """
 
 
+class CourseRoleTask(CourseTask, SQLTask):
+    NAME = 'student_courseaccessrole'
+    SQL = """
+    SELECT org, course_id, user_id, role from student_courseaccessrole
+    where course_id='{course}'
+    """
+
+
+class ForumRoleTask(CourseTask, SQLTask):
+    NAME = 'django_comment_client_role_users'
+    SQL = """
+    select dccr.course_id, dccru.user_id, dccr.name
+    from django_comment_client_role as dccr
+    join django_comment_client_role_users as dccru
+    on dccr.id=dccru.role_id
+    where dccr.course_id='{course}'
+    """
+
+
 class UserCourseTagTask(CourseTask, SQLTask):
     NAME = 'user_api_usercoursetag'
     SQL = """
@@ -879,6 +898,8 @@ DEFAULT_TASKS = [
     ForumsTask,
     CourseStructureTask,
     CourseContentTask,
+    CourseRoleTask,
+    ForumRoleTask,
     OrgEmailOptInTask,
     # To avoid confusing data czars while AI isn't usable, let's not export all the AI
     # tables. Leaving list here so we don't miss any when we're ready to export these.
