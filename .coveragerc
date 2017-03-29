@@ -1,0 +1,7 @@
+# .coveragerc for edx-analytics-exporter
+[run]
+data_file = .coverage
+source = exporter
+
+[report]
+ignore_errors = True

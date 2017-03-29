@@ -1,0 +1,51 @@
+# Sample configuration for exporting data for all orgs from Jenkins.
+
+defaults:
+  auth_file: /path/to/the/auth/file
+  gpg_master_key: the-master-key@example.com
+  gpg_keys: gpg-keys
+  work_dir: /tmp
+  external_prefix: ''
+  output_bucket: the-output-bucket
+  pipeline_bucket: the-pipeline-bucket
+  output_prefix: ''
+  se_bucket: the-stack-exchange-bucket
+  django_admin: ''
+  django_pythonpath: ''
+  django_user: the-django-user
+  django_settings: django.settings
+  django_cms_settings: django.cms.settings
+  django_database: the_django_database
+  mongo_collection: the_mongo_collection
+  sql_user: the_sql_user
+  sql_db: the_sql_db
+  monitor: false
+  graphite_host: localhost
+  graphite_port: 8125
+  graphite_prefix: edx.analytics.research
+
+environments:
+  prod:
+    django_config: /prod/django/config
+    mongo_host: 0.0.0.0:9999
+    mongo_db: the_mongo_db
+    name: prod-mongodb
+    sql_host: prod-sql-host.example.com
+  edge:
+    django_config: /edge/django/config
+    mongo_host: 0.0.0.0:8888
+    mongo_db: the_mongo_db
+    name: edge-mongodb
+    sql_host: edge-sql-host.example.com
+
+organizations:
+  edX:
+    recipients:
+      - john.doe@example.com
+    courses:
+      - edX/DemoX.1/2014
+  TrumpX:
+    recipients:
+      - donald@trump.ru
+    courses:
+      - TrumpX/TrollFarms/2016

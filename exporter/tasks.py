@@ -7,8 +7,12 @@ import distutils
 
 from opaque_keys.edx.keys import CourseKey
 
-from exporter.util import NotSet, execute_shell
+from exporter.config import setup_logging
 from exporter.mysql_query import MysqlDumpQueryToTSV
+from exporter.util import NotSet, execute_shell
+
+
+setup_logging()
 
 
 log = logging.getLogger(__name__)

@@ -51,6 +51,7 @@ import gnupg
 from opaque_keys.edx.keys import CourseKey
 
 from exporter.config import setup, get_config_for_org, get_config_for_env
+from exporter.metrics import collect_elapsed_time
 from exporter.tasks import OrgTask, CourseTask
 from exporter.tasks import FindAllCoursesTask
 from exporter.tasks import FatalTaskError
@@ -70,8 +71,8 @@ log = logging.getLogger(__name__)
 MAX_TRIES_FOR_DATA_UPLOAD = 5
 
 
-def main():
-    general_config = setup(__doc__)
+def main(argv=None):
+    general_config = setup(__doc__, argv=argv)
     for organization in general_config['organizations']:
 
         config = get_config_for_org(general_config, organization)
@@ -135,7 +136,8 @@ def run_tasks(task_cls, **kwargs):
             os.mkdir(file_dir)
 
         try:
-            with logging_streams_on_failure(task.__name__) as (output_file, error_file):
+            with collect_elapsed_time(task, **kwargs), \
+                 logging_streams_on_failure(task.__name__) as (output_file, error_file):                
                 task.run(filename, stderr_file=error_file, stdout_file=output_file, **kwargs)
                 log.info('Saving task results to %s', filename)
                 results.append(filename)

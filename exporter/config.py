@@ -17,8 +17,8 @@ WORK_SUBDIR = 'course-data'
 log = logging.getLogger(__name__)
 
 
-def setup(doc):
-    program_options = docopt(doc)
+def setup(doc, argv=None):
+    program_options = docopt(doc, argv=argv)
     setup_logging()
 
     log.info('Reading configuration')
