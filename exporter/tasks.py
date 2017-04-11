@@ -196,11 +196,9 @@ class DjangoAdminTask(Task):
             **kwargs)
 
         log.info("Running django command %s.", cmd)
-
-        if dry_run:
-            print cmd
-        else:
+        if not dry_run:
             execute_shell(cmd, **kwargs)
+        return cmd
 
 
 class CopyS3FileTask(Task):
@@ -868,7 +866,7 @@ class OrgEmailOptInTask(OrgTask, DjangoAdminTask):
     NAME = 'email_opt_in'
     EXT = 'csv'
     COMMAND = 'email_opt_in_list'
-    ARGS = '{organization} --courses={comma_sep_courses}'
+    ARGS = '{all_organizations} --courses={comma_sep_courses}'
     OUT = '{filename}'
     CMD = """
     sudo -E -u {django_user} {variables}
@@ -881,8 +879,10 @@ class OrgEmailOptInTask(OrgTask, DjangoAdminTask):
 
     @classmethod
     def run(cls, filename, dry_run, **kwargs):
+        organizations = [kwargs['organization']] + kwargs.get('other_names', [])
         kwargs['comma_sep_courses'] = ','.join(kwargs['courses'])
-        super(OrgEmailOptInTask, cls).run(filename, dry_run, **kwargs)
+        kwargs['all_organizations'] = ' '.join(organizations)
+        return super(OrgEmailOptInTask, cls).run(filename, dry_run, **kwargs)
 
 
 DEFAULT_TASKS = [
