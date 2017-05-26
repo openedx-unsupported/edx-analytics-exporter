@@ -328,6 +328,40 @@ class CourseEnrollmentTask(CourseTask, SQLTask):
     WHERE course_id='{course}'
     """
 
+class CourseGradesTask(CourseTask, SQLTask):
+    NAME = 'grades_persistentcoursegrade'
+    SQL = """
+    SELECT course_id,
+           user_id,
+           grading_policy_hash,
+           percent_grade,
+           letter_grade,
+           passed_timestamp,
+           created,
+           modified
+    FROM grades_persistentcoursegrade
+    WHERE grades_persistentcoursegrade.course_id='{course}'
+    ORDER BY grades_persistentcoursegrade.user_id
+    """
+
+class SubsectionGradesTask(CourseTask, SQLTask):
+    NAME = 'grades_persistentsubsectiongrade'
+    SQL = """
+    SELECT course_id,
+           user_id,
+           usage_key,
+           earned_all,
+           possible_all,
+           earned_graded,
+           possible_graded,
+           first_attempted,
+           created,
+           modified
+    FROM grades_persistentsubsectiongrade
+    WHERE grades_persistentsubsectiongrade.course_id='{course}'
+    ORDER BY grades_persistentsubsectiongrade.user_id,
+             grades_persistentsubsectiongrade.first_attempted
+    """
 
 class GeneratedCertificateTask(CourseTask, SQLTask):
     NAME = 'certificates_generatedcertificate'
@@ -891,6 +925,8 @@ DEFAULT_TASKS = [
     TeamsTask,
     TeamsMembershipTask,
     CourseEnrollmentTask,
+    CourseGradesTask,
+    SubsectionGradesTask,
     GeneratedCertificateTask,
     InCourseReverificationTask,
     AuthUserTask,
