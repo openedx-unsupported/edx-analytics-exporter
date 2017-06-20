@@ -518,6 +518,23 @@ class StudentAnonymousUserIDTask(CourseTask, SQLTask):
     WHERE course_id="{course}"
     """
 
+
+class CourseCreditEligibilityTask(CourseTask, SQLTask):
+    NAME = 'credit_crediteligibility'
+    SQL = """
+    SELECT ce.id,
+           ce.created,
+           ce.modified,
+           ce.username,
+           ce.deadline,
+           cc.course_key,
+    FROM credit_crediteligibility AS ce
+    LEFT JOIN credit_creditcourse AS cc on ce.course_id=cc.id
+    WHERE cc.course_key='{course}'
+    ORDER BY cc.username
+    """
+
+
 # Start ORA2 Tables ==================
 
 class ORA2CourseTask(CourseTask):
