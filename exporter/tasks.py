@@ -527,11 +527,11 @@ class CourseCreditEligibilityTask(CourseTask, SQLTask):
            ce.modified,
            ce.username,
            ce.deadline,
-           cc.course_key,
+           cc.course_key
     FROM credit_crediteligibility AS ce
     LEFT JOIN credit_creditcourse AS cc on ce.course_id=cc.id
     WHERE cc.course_key='{course}'
-    ORDER BY cc.username
+    ORDER BY ce.username
     """
 
 
