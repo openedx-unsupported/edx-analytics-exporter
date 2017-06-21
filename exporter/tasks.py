@@ -987,4 +987,5 @@ DEFAULT_TASKS = [
     WorkflowAssessmentWorkflowTask,
     WorkflowAssessmentWorkflowStepTask,
     StudentAnonymousUserIDTask,
+    CourseCreditEligibilityTask,
 ]
