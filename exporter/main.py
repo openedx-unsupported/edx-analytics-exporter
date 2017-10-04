@@ -4,13 +4,15 @@
 Export course data.
 
 Usage:
-  exporter [options] <config> [--env=<environment>...] [--org=<organization>...] [--task=<task>...]
+  exporter [options] <config> [--env=<environment>...] [--org=<organization>...] [--task=<task>...] [--exclude-task=<task>...]
 
 Arguments:
   <config>                   YAML configuration file.
   --env=<environment>        Select environment. Can be specified multiple times.
   --org=<organization>       Select organization. Can be specified multiple times.
   --task=<task>              Select task. Can be specified multiple times.
+  --exclude-task=<task>      Specify task NOT to run.  Useful when not requesting any specific tasks, in which
+                             case all tasks are run.
 
 Options:
   -h --help                  Show this screen.
@@ -97,68 +99,65 @@ def export_organization_data(config, destination):
         courses = get_org_courses(**kwargs)
         kwargs['courses'] = courses
 
-        filenames = run_tasks(OrgTask, **kwargs)
-        results.extend(filenames)
+        tasks_from_options = kwargs.get('tasks', [])
+        excluded_tasks = kwargs.get('exclude_task', [])
 
+        org_tasks = _get_selected_tasks(OrgTask, tasks_from_options, excluded_tasks)
+        results.extend(run_tasks(org_tasks, **kwargs))
+
+        course_tasks = _get_selected_tasks(CourseTask, tasks_from_options, excluded_tasks)
         for course in courses:
             log.info("Getting data for course %s", course)
-            filenames = run_tasks(CourseTask, course=course, **kwargs)
-            results.extend(filenames)
+            results.extend(run_tasks(course_tasks, course=course, **kwargs))
 
     return results
 
 
-def run_tasks(task_cls, **kwargs):
-    results = []
+def _get_selected_tasks(task_cls, tasks_from_options, excluded_tasks):
+    available_tasks = {task.__name__.lower(): task for task in DEFAULT_TASKS if issubclass(task, task_cls)}
+    requested_task_names = [name.lower() for name in tasks_from_options]
+    excluded_task_names = {name.lower() for name in excluded_tasks}
+    filtered_tasks = filter_keys(available_tasks, requested_task_names)
+    return [
+        task for (task_name, task) in filtered_tasks.items()
+        if task and task_name not in excluded_task_names
+    ]
 
-    available_tasks = {t.__name__.lower(): t for t in DEFAULT_TASKS if issubclass(t, task_cls)}
-    requested_tasks = [name.lower() for name in kwargs.get('tasks', [])]
-    selected_tasks = [t for t in filter_keys(available_tasks, requested_tasks).values() if t]
+
+def run_tasks(task_list, **kwargs):
+    results = []
 
     original_kwargs = kwargs
 
-    for task in selected_tasks:
+    for task in task_list:
         # Prevent tasks from overwriting the original arguments
         kwargs = copy(original_kwargs)
 
-        # Skip OrgEmailOptInTask in edge
-        # TODO: make skip tasks configurable
         if task is OrgEmailOptInTask and kwargs['environment'] == 'edge':
             log.info("Ignoring task %s", task.__name__)
             continue
 
-        log.info("Running task %s", task.__name__)
-
-        # Get filename, and make sure its directory exists (in case it's a subdirectory).
-        filename = task.get_filename(**kwargs)
-        file_dir = os.path.dirname(filename)
-        if not os.path.isdir(file_dir):
-            os.mkdir(file_dir)
-
-        try:
-            with collect_elapsed_time(task, **kwargs), \
-                 logging_streams_on_failure(task.__name__) as (output_file, error_file):                
-                task.run(filename, stderr_file=error_file, stdout_file=output_file, **kwargs)
-                log.info('Saving task results to %s', filename)
-                results.append(filename)
-        except FatalTaskError:
-            log.exception('Task %s failed fatally to write to %s', task.__name__, filename)
-            raise
-        except Exception:  # pylint: disable=broad-except
-            failed_filename = filename + '.failed'
-            log.exception('Task %s failed fatally, writing failure file %s', task.__name__, failed_filename)
-
-            # Remove the failed file if it exists
-            if os.path.exists(filename):
-                os.remove(filename)
-
-            # Create placeholder a file with error message
-            with open(failed_filename, 'w') as failure_file:
-                failure_file.write('An error occurred generating this file.\n')
-
-            results.append(failed_filename)
+        results.append(_run_task(task, **kwargs))
 
     return results
+
+
+def _run_task(task, **kwargs):
+    log.info("Running task %s", task.__name__)
+    filename = task.get_filename(**kwargs)
+    try:
+        with collect_elapsed_time(task, **kwargs), \
+             logging_streams_on_failure(task.__name__) as (output_file, error_file):
+            task.run(filename, stderr_file=error_file, stdout_file=output_file, **kwargs)
+            log.info('Saving task results to %s', filename)
+            return filename
+    except FatalTaskError:
+        log.exception('Task %s failed fatally to write to %s', task.__name__, filename)
+        raise
+    except Exception:  # pylint: disable=broad-except
+        failed_filename = task.write_failed_file(**kwargs)
+        log.exception('Task %s failed fatally, writing failure file %s', task.__name__, failed_filename)
+        return failed_filename
 
 
 @with_temp_directory
@@ -301,16 +300,7 @@ def filter_courses(courses, organization_names):
         course_organization = course_key.org.lower()
         return course_organization in organization_names
 
-    matching_courses = []
-    for course in courses:
-        try:
-            if match(course):
-                matching_courses.append(course)
-        except UnicodeDecodeError:
-            log.warning('Offensive course key: %s', course)
-
-    return matching_courses
-
+    return [course for course in courses if match(course)]
 
 def get_all_courses(**kwargs):
     log.info('Retrieving all courses')
@@ -337,8 +327,8 @@ def _find_all_courses(**kwargs):
                 log.warning('Failed to retrieve list of all courses.', exc_info=True)
             else:
                 temp.seek(0)
-                lines = (l.strip() for l in temp.readlines())
-                courses = [l for l in lines if l]
+                lines = (line.strip() for line in temp.readlines())
+                courses = [line.decode('utf-8') for line in lines if line]
                 log.debug("Found courses: %s", courses)
     return courses
 

@@ -23,6 +23,10 @@ def setup(doc, argv=None):
 
     log.info('Reading configuration')
 
+    return _get_config(program_options)
+
+
+def _get_config(program_options):
     with open(program_options['<config>']) as f:
         config = yaml.load(f)
 

@@ -36,52 +36,79 @@ class Task(object):
         pass
 
 
-class OrgTask(object):
-    """ Mixin class for organization level tasks."""
+class FilenameMixin(object):
+    @classmethod
+    def ensure_filename_directory_exists(cls, filename):
+        file_dir = os.path.dirname(filename)
+        if not os.path.isdir(file_dir):
+            os.mkdir(file_dir)
 
     @classmethod
-    def get_filename(cls, **kwargs):
-        template = "{org}-{task}-{name}.{extension}"
+    def get_filename_template(cls, kwargs):
+        template = "{entity}-{task}-{name}.{extension}"
 
-        filename = template.format(
-            org=kwargs['organization'],
+        return template.format(
+            entity=cls.entity_name(kwargs),
             task=cls.NAME,
             name=kwargs['name'],
             extension=cls.EXT
         )
-        return os.path.join(kwargs['work_dir'], filename)
+
+    @classmethod
+    def get_filename(cls, **kwargs):
+        raise NotImplementedError
+
+    @classmethod
+    def write_failed_file(cls, **kwargs):
+        filename = cls.get_filename(**kwargs)
+        if os.path.exists(filename):
+            os.remove(filename)
+
+        failed_filename = filename + '.failed'
+        with open(failed_filename, 'w') as failure_file:
+            failure_file.write('An error occurred generating this file.\n')
+
+        return failed_filename
 
 
-class CourseTask(object):
+class OrgTask(FilenameMixin):
+    """ Mixin class for organization level tasks."""
+    @staticmethod
+    def entity_name(kwargs):
+        return kwargs['organization']
+
+    @classmethod
+    def get_filename(cls, **kwargs):
+        filename = os.path.join(kwargs['work_dir'], cls.get_filename_template(kwargs))
+        cls.ensure_filename_directory_exists(filename)
+        return filename
+
+
+class CourseTask(FilenameMixin):
     """ Mixin class for course level tasks."""
 
     SUBDIR = NotSet
 
     @classmethod
-    def get_filename(cls, **kwargs):
-        template = "{course}-{task}-{name}.{extension}"
-
-        filename = template.format(
-            course=cls.get_course_name(kwargs['course']),
-            task=cls.NAME,
-            environment=kwargs['environment'],
-            name=kwargs['name'],
-            extension=cls.EXT
-        )
-        if cls.SUBDIR != NotSet:
-            return os.path.join(kwargs['work_dir'], cls.SUBDIR, filename)
-        else:
-            return os.path.join(kwargs['work_dir'], filename)
-
-    @classmethod
     def get_course_name(cls, course_id):
         course_key = CourseKey.from_string(course_id)
         if hasattr(course_key, 'ccx'):
-            course = '-'.join((course_key.org, course_key.course, course_key.run, 'ccx', course_key.ccx))
+            return '-'.join((course_key.org, course_key.course, course_key.run, 'ccx', course_key.ccx))
         else:
-            course = '-'.join((course_key.org, course_key.course, course_key.run))
+            return '-'.join((course_key.org, course_key.course, course_key.run))
 
-        return course
+    @classmethod
+    def entity_name(cls, kwargs):
+        return cls.get_course_name(kwargs['course'])
+
+    @classmethod
+    def get_filename(cls, **kwargs):
+        if cls.SUBDIR != NotSet:
+            filename = os.path.join(kwargs['work_dir'], cls.SUBDIR, cls.get_filename_template(kwargs))
+        else:
+            filename = os.path.join(kwargs['work_dir'], cls.get_filename_template(kwargs))
+        cls.ensure_filename_directory_exists(filename)
+        return filename
 
 
 def clean_command(command):
@@ -933,6 +960,7 @@ class OrgEmailOptInTask(OrgTask, DjangoAdminTask):
         organizations = [kwargs['organization']] + kwargs.get('other_names', [])
         kwargs['comma_sep_courses'] = ','.join(kwargs['courses'])
         kwargs['all_organizations'] = ' '.join(organizations)
+        kwargs['max_tries'] = 3 # always retry this task a couple of times.
         return super(OrgEmailOptInTask, cls).run(filename, dry_run, **kwargs)
 
 
