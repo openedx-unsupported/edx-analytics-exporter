@@ -301,9 +301,15 @@ def filter_courses(courses, organization_names):
         course_organization = course_key.org.lower()
         return course_organization in organization_names
 
-    courses = [c for c in courses if match(c)]
+    matching_courses = []
+    for course in courses:
+        try:
+            if match(course):
+                matching_courses.append(course)
+        except UnicodeDecodeError:
+            log.warning('Offensive course key: %s', course)
 
-    return courses
+    return matching_courses
 
 
 def get_all_courses(**kwargs):
