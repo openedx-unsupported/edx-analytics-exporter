@@ -21,6 +21,7 @@ Options:
   -h --help                Show this screen.
   -n --dry-run             Don't run anything, just show what would be done.
   --output-bucket=<bucket> Destination S3 bucket.
+  --output-prefix=<prefix> Optional prefix to add to filename.
   --include=<file>         Include data from file in property file.
   --orgs=<orgs>            Space separated list of organization identifiers.
                            Can use wildcards.
@@ -44,11 +45,12 @@ def main():
     orgs = program_options['--orgs']
     files = program_options['--include']
     bucket = program_options['--output-bucket']
+    prefix = program_options['--output-prefix']
 
-    export_properties(config, directory, files, orgs)
+    export_properties(config, directory, files, orgs, prefix)
 
 
-def export_properties(config, directory, files=None, orgs=None):
+def export_properties(config, directory, files=None, orgs=None, prefix=''):
     recreate_directory(directory)
 
     orgs = [o.lower() for o in orgs.split()] if orgs else ['*']
@@ -67,6 +69,7 @@ def export_properties(config, directory, files=None, orgs=None):
             with open(filename, 'w') as f:
                 f.write('ORG={}\n'.format(organization))
                 f.write('OUTPUT_BUCKET={}\n'.format(bucket))
+                f.write('OUTPUT_PREFIX={}\n'.format(prefix))
                 f.write(files_data)
 
 
