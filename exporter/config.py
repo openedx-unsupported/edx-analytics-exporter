@@ -30,6 +30,13 @@ def _get_config(program_options):
     with open(program_options['<config>']) as f:
         config = yaml.load(f)
 
+    with open(program_options['<org-config>']) as f:
+        org_config = yaml.load(f)
+
+    # Organization Data czar configuration comes from a separate yaml file.
+    # Update the config object with this information.
+    config['organizations'] = org_config['organizations']
+
     update_config(config, program_options)
 
     # modify work directory for this command
