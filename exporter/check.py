@@ -5,10 +5,11 @@ Check the most recent export to ensure that all expected files were created prop
 zero status if and only if it detects a problem.
 
 Usage:
-    exporter-check [options] <config>
+    exporter-check [options] <config> <org-config>
 
 Arguments:
     <config>                 YAML configuration file.
+    <org-config>             YAML organization configuration file.
 
 Options:
     -h --help                Show this screen.
