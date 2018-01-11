@@ -4,11 +4,10 @@
 Export course data.
 
 Usage:
-  course-exporter [options] <config> <org-config> [--env=<environment>...] [--course=<course>...] [--task=<task>...]
+  course-exporter [options] <config> [--env=<environment>...] [--course=<course>...] [--task=<task>...]
 
 Arguments:
   <config>                   YAML configuration file.
-  <org-config>               YAML organization configuration file.
   --env=<environment>        Select environment. Can be specified multiple times.
   --task=<task>              Select task. Can be specified multiple times.
   --course=<course>             Select course. Can be specified multiple times.
