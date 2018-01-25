@@ -15,7 +15,7 @@ Usage:
 
 Arguments:
   <config>                 YAML configuration file.
-  <org-config>            YAML Data czar configuration file.
+  <org-config>             YAML Data czar configuration file.
   <directory>              Directory where to save Jenkins property files.
 
 Options:
