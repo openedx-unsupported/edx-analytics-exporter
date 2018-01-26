@@ -11,10 +11,11 @@ values can be used by Jenkins jobs to start multiple exporter tasks,
 using each property file for the task parameters.
 
 Usage:
-  exporter-properties [options] [--include=<file>...] <config> <directory>
+  exporter-properties [options] [--include=<file>...] <config> <org-config> <directory>
 
 Arguments:
   <config>                 YAML configuration file.
+  <org-config>             YAML Data czar configuration file.
   <directory>              Directory where to save Jenkins property files.
 
 Options:

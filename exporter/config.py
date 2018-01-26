@@ -30,6 +30,13 @@ def _get_config(program_options):
     with open(program_options['<config>']) as f:
         config = yaml.load(f)
 
+    if '<org-config>' in program_options:
+        # org-config is not passed in separately for all jobs and is not available to jobs that run as a "slave"
+        with open(program_options['<org-config>']) as f:
+            org_config = yaml.load(f)
+
+        config['organizations'] = org_config['organizations']
+
     update_config(config, program_options)
 
     # modify work directory for this command
