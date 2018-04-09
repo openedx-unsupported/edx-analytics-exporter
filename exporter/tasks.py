@@ -399,19 +399,20 @@ class GeneratedCertificateTask(CourseTask, SQLTask):
     """
 
 
-class InCourseReverificationTask(CourseTask, SQLTask):
-    NAME = 'verify_student_verificationstatus'
-    SQL = """
-    SELECT vs.timestamp,
-           vs.status,
-           vc.course_id,
-           vc.checkpoint_location,
-           vs.user_id
-    FROM verify_student_verificationstatus AS vs
-    LEFT JOIN verify_student_verificationcheckpoint AS vc ON vs.checkpoint_id=vc.id
-    WHERE vc.course_id='{course}'
-    ORDER BY vs.timestamp ASC
-    """
+# We can no longer execute this task because the verify_student_verificationstatus table no longer exists
+# class InCourseReverificationTask(CourseTask, SQLTask):
+#     NAME = 'verify_student_verificationstatus'
+#     SQL = """
+#     SELECT vs.timestamp,
+#            vs.status,
+#            vc.course_id,
+#            vc.checkpoint_location,
+#            vs.user_id
+#     FROM verify_student_verificationstatus AS vs
+#     LEFT JOIN verify_student_verificationcheckpoint AS vc ON vs.checkpoint_id=vc.id
+#     WHERE vc.course_id='{course}'
+#     ORDER BY vs.timestamp ASC
+#     """
 
 
 class AuthUserTask(CourseTask, SQLTask):
@@ -973,7 +974,6 @@ DEFAULT_TASKS = [
     CourseGradesTask,
     SubsectionGradesTask,
     GeneratedCertificateTask,
-    InCourseReverificationTask,
     AuthUserTask,
     AuthUserProfileTask,
     StudentLanguageProficiencyTask,
