@@ -193,7 +193,7 @@ class DjangoAdminTask(Task):
     VARS = 'CONFIG_ROOT={django_config} SERVICE_VARIANT=lms'
     OUT = '/dev/null'
     CMD = """
-    sudo -E -u {django_user} {variables}
+    {variables}
       {django_admin} {command}
       --settings={django_settings}
       --pythonpath={django_pythonpath}
@@ -932,7 +932,7 @@ class CourseContentTask(CourseTask, DjangoAdminTask):
     VARS = 'CONFIG_ROOT={django_config} SERVICE_VARIANT=cms'
     # Change CMD to use django_cms_settings.
     CMD = """
-    sudo -E -u {django_user} {variables}
+    {variables}
       {django_admin} {command}
       --settings={django_cms_settings}
       --pythonpath={django_pythonpath}
@@ -948,7 +948,7 @@ class OrgEmailOptInTask(OrgTask, DjangoAdminTask):
     ARGS = '{all_organizations} --courses={comma_sep_courses} --email-optin-chunk-size=10000'
     OUT = '{filename}'
     CMD = """
-    sudo -E -u {django_user} {variables}
+    {variables}
       {django_admin} {command}
       --settings={django_settings}
       --pythonpath={django_pythonpath}
