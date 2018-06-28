@@ -193,7 +193,7 @@ class DjangoAdminTask(Task):
     VARS = 'CONFIG_ROOT={django_config} SERVICE_VARIANT=lms'
     OUT = '/dev/null'
     CMD = """
-    sudo -E -u {django_user} {variables}
+    {variables}
       {django_admin} {command}
       --settings={django_settings}
       --pythonpath={django_pythonpath}
@@ -948,7 +948,7 @@ class OrgEmailOptInTask(OrgTask, DjangoAdminTask):
     ARGS = '{all_organizations} --courses={comma_sep_courses} --email-optin-chunk-size=10000'
     OUT = '{filename}'
     CMD = """
-    sudo -E -u {django_user} {variables}
+    {variables}
       {django_admin} {command}
       --settings={django_settings}
       --pythonpath={django_pythonpath}
@@ -961,7 +961,7 @@ class OrgEmailOptInTask(OrgTask, DjangoAdminTask):
         organizations = [kwargs['organization']] + kwargs.get('other_names', [])
         kwargs['comma_sep_courses'] = ','.join(kwargs['courses'])
         kwargs['all_organizations'] = ' '.join(organizations)
-        kwargs['max_tries'] = 3 # always retry this task a couple of times.
+        kwargs['max_tries'] = 1 # always retry this task a couple of times.
         return super(OrgEmailOptInTask, cls).run(filename, dry_run, **kwargs)
 
 
