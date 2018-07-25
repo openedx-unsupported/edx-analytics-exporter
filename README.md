@@ -1,3 +1,9 @@
+*Note*
+This is a copy of the environment/production branch.  This branch will exist while we are transitioning the services from the Admin jenkins box to the new jenkins box.  This branch is needed because the historical running environment relied upon a specific /mnt/ephemeral-01 working path and the ability to execute jobs using SUDO.  The new running environment uses a local working path and does not rely upon SUDO. 
+
+Any commit merges pulled down into this branch must respect the historical working path and inclusion of SUDO.
+
+
 edx-analytics-exporter
 ===============
 
