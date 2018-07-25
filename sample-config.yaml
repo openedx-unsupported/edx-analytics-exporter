@@ -12,7 +12,6 @@ defaults:
   se_bucket: the-stack-exchange-bucket
   django_admin: ''
   django_pythonpath: ''
-  django_user: the-django-user
   django_settings: django.settings
   django_cms_settings: django.cms.settings
   django_database: the_django_database

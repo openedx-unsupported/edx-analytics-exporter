@@ -24,7 +24,6 @@ def test_org_email_opt_in_task(mock_execute_shell):
         'other_names': ['the-second-org', 'the-third-org'],
         'courses': ['course-1', 'course-2'],
         'django_config': 'the-django-config',
-        'django_user': 'the-django-user',
         'django_admin': 'the-django-admin',
         'django_settings': 'the-django-setings',
         'django_pythonpath': 'the-django-python-path',
