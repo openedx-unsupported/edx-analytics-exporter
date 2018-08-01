@@ -54,7 +54,7 @@ def collect_elapsed_time(cls, **kwargs):
 
     metric_name = get_metric_name(cls, **kwargs)
     if not metric_name:
-        log.info('No organization for this task, not sending metrics. Available kwargs are: %s', kwargs)
+        log.info('No organization for this task, not sending metrics.')
         return
 
 
