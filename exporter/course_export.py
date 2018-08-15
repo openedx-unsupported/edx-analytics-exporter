@@ -4,11 +4,10 @@
 Export course data.
 
 Usage:
-  course-exporter [options] <config> <org-config> [--env=<environment>...] [--course=<course>...] [--task=<task>...]
+  course-exporter [options] <config> [--env=<environment>...] [--course=<course>...] [--task=<task>...]
 
 Arguments:
   <config>                   YAML configuration file.
-  <org-config>               YAML organization configuration file.
   --env=<environment>        Select environment. Can be specified multiple times.
   --task=<task>              Select task. Can be specified multiple times.
   --course=<course>             Select course. Can be specified multiple times.
@@ -47,7 +46,7 @@ import re
 from opaque_keys.edx.keys import CourseKey
 
 from exporter.tasks import CourseTask, FatalTaskError
-from exporter.main import run_tasks, archive_directory, upload_data, get_all_courses
+from exporter.main import run_tasks, archive_directory, upload_data, get_all_courses, _get_selected_tasks
 from exporter.config import setup, get_config_for_env, get_config_for_course
 from exporter.util import make_temp_directory, with_temp_directory, merge
 
@@ -94,7 +93,10 @@ def export_course_data(config, destination, environment):
     kwargs['work_dir'] = destination
 
     log.info("Getting data for course %s", config['course'])
-    filenames = run_tasks(CourseTask, **kwargs)
+    tasks_from_options = kwargs.get('tasks', [])
+    course_tasks = _get_selected_tasks(CourseTask, tasks_from_options, [])
+
+    filenames = run_tasks(course_tasks, **kwargs)
     results.extend(filenames)
 
     return results
