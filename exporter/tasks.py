@@ -563,6 +563,19 @@ class CourseCreditEligibilityTask(CourseTask, SQLTask):
     """
 
 
+class CourseGroupCohortMembershipTask(CourseTask, SQLTask):
+    NAME = 'course_groups_cohortmembership'
+    SQL = """
+    SELECT cm.user_id,
+           cm.course_id,
+           cug.group_type,
+           cug.name
+    FROM course_groups_cohortmembership cm
+    INNER JOIN course_groups_courseusergroup cug on cm.course_user_group_id = cug.id
+    WHERE cm.course_id='{course}'
+    """
+
+
 # Start ORA2 Tables ==================
 
 class ORA2CourseTask(CourseTask):
@@ -1016,4 +1029,5 @@ DEFAULT_TASKS = [
     WorkflowAssessmentWorkflowStepTask,
     StudentAnonymousUserIDTask,
     CourseCreditEligibilityTask,
+    CourseGroupCohortMembershipTask,
 ]
