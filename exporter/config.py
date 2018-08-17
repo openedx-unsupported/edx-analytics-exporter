@@ -84,6 +84,7 @@ def update_environments(config):
 
     # read authentication tokens
     tokens = {}
+    log.info('values: %s', values)
     auth_filename = values.get('auth_file', '').format(WORKSPACE=os.environ['WORKSPACE'])
 
     if auth_filename and os.path.exists(auth_filename):
