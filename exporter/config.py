@@ -84,11 +84,12 @@ def update_environments(config):
 
     # read authentication tokens
     tokens = {}
-    auth_filename = values.get('auth_file').format(WORKSPACE=os.environ['WORKSPACE'])
-
-    if auth_filename and os.path.exists(auth_filename):
-        with open(auth_filename) as auth_file:
-            tokens.update(json.load(auth_file))
+    auth_filename = values.get('auth_file')
+    if auth_filename:
+        auth_filename = auth_filename.format(WORKSPACE=os.environ['WORKSPACE'])
+        if os.path.exists(auth_filename):
+            with open(auth_filename) as auth_file:
+                tokens.update(json.load(auth_file))
 
     # update "known" environments with the values from the auth file.
     # this would not be necessary if the configuration file had all the values
