@@ -59,14 +59,15 @@ def export_properties(config, directory, files=None, orgs=None, prefix=''):
 
     files_data = load_files(files)
 
-    for organization in config['organizations']:
+    for org_counter, organization in enumerate(config['organizations']):
         org_config = get_config_for_org(config, organization)
 
         bucket = org_config['output_bucket']
         organization = organization.lower()
 
         if any(fnmatch(organization, org) for org in orgs):
-            filename = os.path.join(directory, organization)
+            prefix = "{counter:05d}_".format(counter=org_counter)
+            filename = os.path.join(directory, prefix, organization)
             with open(filename, 'w') as f:
                 f.write('ORG={}\n'.format(organization))
                 f.write('OUTPUT_BUCKET={}\n'.format(bucket))
