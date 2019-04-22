@@ -66,9 +66,9 @@ def export_properties(config, directory, files=None, orgs=None, prefix=''):
         organization = organization.lower()
 
         if any(fnmatch(organization, org) for org in orgs):
-            prefix = "{counter:05d}_".format(counter=org_counter)
-            filename = os.path.join(directory, prefix, organization)
-            with open(filename, 'w') as f:
+            filename = "{counter:05d}_{organization}".format(counter=org_counter, organization=organization)
+            filename_with_path = os.path.join(directory, filename)
+            with open(filename_with_path, 'w') as f:
                 f.write('ORG={}\n'.format(organization))
                 f.write('OUTPUT_BUCKET={}\n'.format(bucket))
                 f.write('OUTPUT_PREFIX={}\n'.format(prefix))
