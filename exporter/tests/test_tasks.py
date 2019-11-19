@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*
+
 from copy import deepcopy
 
 from exporter import tasks
@@ -58,3 +60,12 @@ def test_get_filename_course_task():
         'course': 'course-v1:edX+DemoX+Demo_Course',
     }
     assert '/tmp/workdir/edX-DemoX-Demo_Course-test_course_task-test-analytics.csv' == TestCourseTask.get_filename(**kwargs)
+
+
+def test_get_non_ascii_filename_course_task():
+    kwargs = {
+        'name': 'test-analytics',
+        'work_dir': '/tmp/workdir/',
+        'course': u'course-v1:edX+DemoX+Démo_Course',
+    }
+    assert '/tmp/workdir/edX-DemoX-D_mo_Course-test_course_task-test-analytics.csv' == TestCourseTask.get_filename(**kwargs)

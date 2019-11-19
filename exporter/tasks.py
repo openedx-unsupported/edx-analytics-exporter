@@ -21,6 +21,17 @@ MAX_TRIES_FOR_MARKER_FILE_CHECK = 5
 MAX_TRIES_FOR_COPY_FILE_FROM_S3 = 5
 
 
+def _substitute_non_ascii_chars(string):
+    """
+    substitute all non ASCII-friendly characters in a string with
+    underscores so that they can be used in creating file names.
+    """
+    substituted_string = ''.join(
+        ['_' if ord(c) > 128 else c for c in string]
+    )
+    return ''.join(substituted_string)
+
+
 class FatalTaskError(Exception):
     """Exception marking tasks that should be treated as fatal."""
     pass
@@ -75,7 +86,8 @@ class OrgTask(FilenameMixin):
     """ Mixin class for organization level tasks."""
     @staticmethod
     def entity_name(kwargs):
-        return kwargs['organization']
+        organization = _substitute_non_ascii_chars(kwargs['organization'])
+        return organization
 
     @classmethod
     def get_filename(cls, **kwargs):
@@ -99,7 +111,8 @@ class CourseTask(FilenameMixin):
 
     @classmethod
     def entity_name(cls, kwargs):
-        return cls.get_course_name(kwargs['course'])
+        course = _substitute_non_ascii_chars(cls.get_course_name(kwargs['course']))
+        return course
 
     @classmethod
     def get_filename(cls, **kwargs):

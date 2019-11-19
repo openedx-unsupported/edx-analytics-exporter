@@ -6,3 +6,5 @@
 .idea/
 .python-version
 config.yaml.local
+
+*.swp
