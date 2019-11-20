@@ -926,7 +926,7 @@ class ForumsTask(CourseTask, MongoTask):
         template = "{course}-{environment}.{extension}"
 
         filename = template.format(
-            course=cls.get_course_name(kwargs['course']),
+            course=cls.entity_name(kwargs),
             environment=kwargs['environment'],
             extension=cls.EXT
         )
