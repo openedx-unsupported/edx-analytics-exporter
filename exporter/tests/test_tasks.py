@@ -24,7 +24,7 @@ def test_org_email_opt_in_task(mock_execute_shell):
     kwargs = {
         'organization': 'the-org',
         'other_names': ['the-second-org', 'the-third-org'],
-        'courses': ['course-1', 'course-2'],
+        'courses': ['course-1', u'coursé-2'],
         'django_config': 'the-django-config',
         'django_admin': 'the-django-admin',
         'django_settings': 'the-django-setings',
@@ -35,11 +35,11 @@ def test_org_email_opt_in_task(mock_execute_shell):
 
     command = tasks.OrgEmailOptInTask.run(filename, dry_run, **kwargs)
 
-    assert command.endswith('the-filename the-org the-second-org the-third-org --courses=course-1,course-2 --email-optin-chunk-size=10000')
+    assert command.endswith(u'the-filename the-org the-second-org the-third-org --courses=course-1,coursé-2 --email-optin-chunk-size=10000')
     assert 'email_opt_in_list' in command
     expected_kwargs = deepcopy(kwargs)
     expected_kwargs['all_organizations'] = 'the-org the-second-org the-third-org'
-    expected_kwargs['comma_sep_courses'] = 'course-1,course-2'
+    expected_kwargs['comma_sep_courses'] = u'course-1,coursé-2'
     expected_kwargs['max_tries'] = 3
     mock_execute_shell.assert_called_once_with(command, **expected_kwargs)
 
