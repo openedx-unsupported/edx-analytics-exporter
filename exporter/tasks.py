@@ -29,7 +29,7 @@ def _substitute_non_ascii_chars(string):
     substituted_string = ''.join(
         ['_' if ord(c) > 128 else c for c in string]
     )
-    return ''.join(substituted_string)
+    return substituted_string
 
 
 class FatalTaskError(Exception):
