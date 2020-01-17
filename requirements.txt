@@ -2,7 +2,7 @@
 awscli
 docopt
 edx-ccx-keys
-edx-opaque-keys
+edx-opaque-keys==2.0.0 # to work on jenkins-ci
 graphitesend==0.10.0 # Apache
 path.py
 pbr
