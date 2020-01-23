@@ -266,60 +266,60 @@ class CopyS3FileTask(Task):
             filename='job_success/_SUCCESS'
         )
 
-        if dry_run:
-            print('Copy S3 File: {0} to {1}'.format(
-                s3_source_filename,
-                filename))
-        else:
-            # First check to see that the export data was successfully generated
-            # by looking for a marker file for that run. Return a more severe failure,
-            # so that the overall environment dump fails, rather than just the particular
-            # file being copied.
+        # if dry_run:
+            # print 'Copy S3 File: {0} to {1}'.format(
+                # s3_source_filename,
+                # filename)
+        # else:
+            # # First check to see that the export data was successfully generated
+            # # by looking for a marker file for that run. Return a more severe failure,
+            # # so that the overall environment dump fails, rather than just the particular
+            # # file being copied.
 
-            head_command = "aws s3api head-object --bucket {bucket} --key {key}"
+            # head_command = "aws s3api head-object --bucket {bucket} --key {key}"
 
-            marker_command = head_command.format(
-                bucket=kwargs['pipeline_bucket'],
-                key=s3_marker_filename
-            )
+            # marker_command = head_command.format(
+                # bucket=kwargs['pipeline_bucket'],
+                # key=s3_marker_filename
+            # )
 
-            source_command = head_command.format(
-                bucket=kwargs['pipeline_bucket'],
-                key=s3_source_filename
-            )
+            # source_command = head_command.format(
+                # bucket=kwargs['pipeline_bucket'],
+                # key=s3_source_filename
+            # )
 
-            try:
-                log.info("Running command with retries: %s.", marker_command)
-                # Define retries here, to recover from temporary outages when calling S3 to find files.
-                local_kwargs = dict(**kwargs)
-                local_kwargs['max_tries'] = MAX_TRIES_FOR_MARKER_FILE_CHECK
-                execute_shell(marker_command, **local_kwargs)
-            except subprocess.CalledProcessError:
-                error_message = 'Unable to find success marker for export {0}'.format(s3_marker_filename)
-                log.error(error_message)
-                raise FatalTaskError(error_message)
+            # try:
+                # log.info("Running command with retries: %s.", marker_command)
+                # # Define retries here, to recover from temporary outages when calling S3 to find files.
+                # local_kwargs = dict(**kwargs)
+                # local_kwargs['max_tries'] = MAX_TRIES_FOR_MARKER_FILE_CHECK
+                # execute_shell(marker_command, **local_kwargs)
+            # except subprocess.CalledProcessError:
+                # error_message = 'Unable to find success marker for export {0}'.format(s3_marker_filename)
+                # log.error(error_message)
+                # raise FatalTaskError(error_message)
 
-            # Then check that the source file exists.  It's okay if it isn't,
-            # as that will happen when a particular database table is empty.
-            try:
-                log.info("Running command %s.", source_command)
-                execute_shell(source_command, **kwargs)
-            except subprocess.CalledProcessError:
-                log.info('Unable to find %s to copy.', s3_source_filename)
-            else:
-                try:
-                    cmd = 'aws s3 cp s3://{bucket}/{src} {dest}'.format(
-                        bucket=kwargs['pipeline_bucket'],
-                        src=s3_source_filename,
-                        dest=filename
-                    )
-                    # Define retries here, to recover from temporary outages when calling S3 to copy files.
-                    local_kwargs = dict(**kwargs)
-                    local_kwargs['max_tries'] = MAX_TRIES_FOR_COPY_FILE_FROM_S3
-                    execute_shell(cmd, **local_kwargs)
-                except subprocess.CalledProcessError:
-                    log.error('Unable to copy %s to %s', s3_source_filename, filename)
-                    raise
+            # # Then check that the source file exists.  It's okay if it isn't,
+            # # as that will happen when a particular database table is empty.
+            # try:
+                # log.info("Running command %s.", source_command)
+                # execute_shell(source_command, **kwargs)
+            # except subprocess.CalledProcessError:
+                # log.info('Unable to find %s to copy.', s3_source_filename)
+            # else:
+                # try:
+                    # cmd = 'aws s3 cp s3://{bucket}/{src} {dest}'.format(
+                        # bucket=kwargs['pipeline_bucket'],
+                        # src=s3_source_filename,
+                        # dest=filename
+                    # )
+                    # # Define retries here, to recover from temporary outages when calling S3 to copy files.
+                    # local_kwargs = dict(**kwargs)
+                    # local_kwargs['max_tries'] = MAX_TRIES_FOR_COPY_FILE_FROM_S3
+                    # execute_shell(cmd, **local_kwargs)
+                # except subprocess.CalledProcessError:
+                    # log.error('Unable to copy %s to %s', s3_source_filename, filename)
+                    # raise
 
 
 class UserIDMapTask(CourseTask, SQLTask):

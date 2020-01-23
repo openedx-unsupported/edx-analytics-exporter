@@ -86,7 +86,8 @@ def main(argv=None):
             results = export_organization_data(config, destination)
             encrypt_files(config, results)
             archive = archive_directory(config, destination)
-            upload_data(config, archive)
+            # DO NOT WRITE TO S3
+            #upload_data(config, archive)
 
 
 def export_organization_data(config, destination):
