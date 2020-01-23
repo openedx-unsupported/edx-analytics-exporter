@@ -63,7 +63,8 @@ def main():
 
         with make_course_directory(config, course) as temp_directory:
             results = export_course_data(config, temp_directory, courses_with_env[course])
-            upload_files(config, temp_directory)
+            # DO NOT WRITE TO S3
+            # upload_files(config, temp_directory)
 
 def get_courses_with_env(config):
     courses_with_env = {}
