@@ -206,7 +206,7 @@ class DjangoAdminTask(Task):
     ARGS = NotSet
     EXT = NotSet
     VARS = 'CONFIG_ROOT={django_config} SERVICE_VARIANT=lms'
-    OUT = '/dev/null'
+    OUT = '{work_dir}'
     CMD = """
     {variables}
       {django_admin} {command}
