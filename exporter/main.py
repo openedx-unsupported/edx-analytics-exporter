@@ -327,6 +327,14 @@ def _find_all_courses(**kwargs):
             try:
                 FindAllCoursesTask.run(temp.name, stderr_file=error_file, stdout_file=output_file, **kwargs)
             except:  # pylint: disable=bare-except
+                log.info('DEBUG:STDOUT')
+                with open(output_file) as out:
+                    for line in out.readlines():
+                        log.info(line)
+                log.info('DEBUG:STDERR')
+                with open(error_file) as out:
+                    for line in out.readlines():
+                        log.info(line)
                 courses = []
                 log.warning('Failed to retrieve list of all courses.', exc_info=True)
             else:
