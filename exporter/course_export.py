@@ -76,13 +76,13 @@ def get_courses_with_env(config):
          kwargs = merge(config['values'], config['environments'][environment])
          all_courses  = get_all_courses(**kwargs)
 
-         logger.info("ALL COURSES: %s", [str(c) for c in all_courses])
+         log.info("ALL COURSES: %s", [str(c) for c in all_courses])
          if all_courses:
              found_courses = set(courses) & set(all_courses)
              courses_with_env.update({course: environment for course in found_courses})
              courses = set(courses) - found_courses
 
-    logger.info("COURSES: %s", [str(c) for c in courses])
+    log.info("COURSES: %s", [str(c) for c in courses])
     if courses:
         log.error("Failed to find courses: %s", list(courses))
         raise FatalTaskError("Failed to find courses in configured environments.")
