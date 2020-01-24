@@ -213,7 +213,7 @@ class DjangoAdminTask(Task):
       --settings={django_settings}
       --pythonpath={django_pythonpath}
       {arguments}
-    > {output}
+    &> {output}
     """
 
     @classmethod
