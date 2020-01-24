@@ -12,6 +12,7 @@ python-dateutil
 python-gnupg==0.3.6
 pyyaml
 psutil
+six
 
 # Tests
 coverage==4.3.4
