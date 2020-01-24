@@ -8,3 +8,5 @@
 config.yaml.local
 
 *.swp
+
+.tox
