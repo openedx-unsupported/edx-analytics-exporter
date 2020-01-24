@@ -38,7 +38,6 @@ Options:
   --django-pythonpath=<path> The django python path
 """
 
-from __future__ import absolute_import
 from contextlib import contextmanager
 from copy import copy
 import datetime
@@ -64,7 +63,6 @@ from exporter.tasks import OrgEmailOptInTask
 from exporter.util import make_temp_directory, with_temp_directory
 from exporter.util import filter_keys, memoize, execute_shell
 from exporter.util import logging_streams_on_failure
-import six
 
 
 log = logging.getLogger(__name__)
@@ -309,7 +307,7 @@ def get_all_courses(**kwargs):
     log.info('Retrieving all courses')
 
     # make a set of fixed arguments, so we can memoize
-    kwargs = {k: v for k, v in six.iteritems(kwargs) if k.startswith('django')}
+    kwargs = {k: v for k, v in kwargs.iteritems() if k.startswith('django')}
     kwargs['dry_run'] = False  # always query for course names
     kwargs['limit'] = False  # don't limit number of courses
 
