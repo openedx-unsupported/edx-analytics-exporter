@@ -8,15 +8,22 @@ class TestTask(tasks.OrgTask, tasks.Task):
     NAME = 'test_task'
     EXT = 'csv'
 
-
 def test_get_selected_tasks_no_options_org_tasks():
     assert [tasks.OrgEmailOptInTask] == main._get_selected_tasks(tasks.OrgTask, [], [])
 
 
 def test_get_selected_tasks_no_options_course_tasks():
-    assert sorted([
-        task for task in tasks.DEFAULT_TASKS if issubclass(task, tasks.CourseTask)
-    ]) == sorted(main._get_selected_tasks(tasks.CourseTask, [], []))
+    default_tasks = sorted(
+        [
+            task for task in tasks.DEFAULT_TASKS if issubclass(task, tasks.CourseTask)
+        ],
+        key=lambda task: task.NAME
+    )
+    selected_tasks = sorted(
+        main._get_selected_tasks(tasks.CourseTask, [], []),
+        key=lambda task: task.NAME
+    )
+    assert default_tasks == selected_tasks
 
 
 def test_get_selected_tasks_specified_from_options():
@@ -24,9 +31,16 @@ def test_get_selected_tasks_specified_from_options():
 
 
 def test_get_selected_tasks_excluded_tasks():
-    assert sorted(
-        set(tasks.DEFAULT_TASKS) - set([tasks.OrgEmailOptInTask])
-    ) == sorted(main._get_selected_tasks(tasks.Task, [], ['OrgEmailOptInTask']))
+    default_tasks = sorted(
+        set(tasks.DEFAULT_TASKS) - set([tasks.OrgEmailOptInTask]),
+        key=lambda task: task.NAME
+    )
+    selected_tasks = sorted(
+        main._get_selected_tasks(tasks.Task, [], ['OrgEmailOptInTask']),
+        key=lambda task: task.NAME
+    )
+    assert default_tasks == selected_tasks
+
 
 
 def test_run_tasks_happy_path():
