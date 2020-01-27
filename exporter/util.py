@@ -161,14 +161,16 @@ def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
         log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
 
         log.info('DEBUG:::')
+        log.info(additional_args['stdout'])
+        log.info(type(additional_args['stdout']))
         log.info('stdout_file:::')
         with open(additional_args['stdout'], 'rb') as fi:
             for line in fi.readlines():
-                print line
+                log.info(line))
         log.info('stderr_file:::')
         with open(additional_args['stderr'], 'rb') as fi:
             for line in fi.readlines():
-                print line
+                log.info(line))
 
 
 
