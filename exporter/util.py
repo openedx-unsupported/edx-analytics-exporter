@@ -162,11 +162,11 @@ def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
 
         log.info('DEBUG:::')
         log.info('stdout_file:::')
-        with open(additional_args['stdout'], 'r') as fi:
+        with open(additional_args['stdout'], 'rb') as fi:
             for line in fi.readlines():
                 print line
         log.info('stderr_file:::')
-        with open(additional_args['stderr'], 'r') as fi:
+        with open(additional_args['stderr'], 'rb') as fi:
             for line in fi.readlines():
                 print line
 
