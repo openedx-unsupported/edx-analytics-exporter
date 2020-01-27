@@ -157,8 +157,6 @@ def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
         return_val = subprocess.check_call(cmd, shell=True, **additional_args)
         return return_val
     except subprocess.CalledProcessError as exception:
-        if attempt >= max_tries:
-            raise
 
         log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
         attempt += 1
@@ -167,6 +165,8 @@ def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
         time.sleep(exponential_delay)
 
         log.info("Retrying command: attempt %d", attempt)
+        if attempt >= max_tries:
+            raise
         return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
 
 
