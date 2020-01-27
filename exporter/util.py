@@ -164,11 +164,11 @@ def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
         log.info(additional_args['stdout'])
         log.info(type(additional_args['stdout']))
         log.info('stdout_file:::')
-        with additional_args'stdout'] as fi:
+        with additional_args['stdout'] as fi:
             for line in fi.readlines():
                 log.info(line)
         log.info('stderr_file:::')
-        with additional_args'stderr'] as fi:
+        with additional_args['stderr'] as fi:
             for line in fi.readlines():
                 log.info(line)
 
