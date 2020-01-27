@@ -159,6 +159,20 @@ def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
     except subprocess.CalledProcessError as exception:
 
         log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
+
+        log.info('DEBUG:::')
+        log.info('stdout_file:::')
+        with open(additional_args['stdout'], 'r') as fi:
+            for line in fi.readlines():
+                print line
+        log.info('stderr_file:::')
+        with open(additional_args['stderr'], 'r') as fi:
+            for line in fi.readlines():
+                print line
+
+
+
+
         attempt += 1
         exponential_delay = BASE_RETRY_DELAY_IN_SECONDS * (2 ** attempt)
         log.info("Waiting %d seconds before attempting retry %d", exponential_delay, attempt)
