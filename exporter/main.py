@@ -338,7 +338,7 @@ def _find_all_courses(**kwargs):
 def make_org_directory(config, organization):
     org_dir = config['work_dir']
 
-    prefix = '{0}_'.format(organization)
+    prefix = 'STU_{0}_'.format(organization)
 
     with make_temp_directory(prefix=prefix, directory=org_dir) as temp_dir:
         # create working directory
