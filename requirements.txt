@@ -6,7 +6,6 @@ edx-opaque-keys==2.0.0 # to work on jenkins-ci
 graphitesend==0.10.0 # Apache
 path.py
 pbr
-pip
 pymongo
 python-dateutil
 python-gnupg==0.3.6
