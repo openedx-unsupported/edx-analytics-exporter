@@ -63,10 +63,9 @@ from exporter.tasks import OrgEmailOptInTask
 from exporter.util import make_temp_directory, with_temp_directory
 from exporter.util import filter_keys, memoize, execute_shell
 from exporter.util import logging_streams_on_failure
-
+import six
 
 log = logging.getLogger(__name__)
-
 
 # pylint: disable=missing-docstring
 
@@ -77,7 +76,6 @@ MAX_TRIES_FOR_DATA_UPLOAD = 5
 def main(argv=None):
     general_config = setup(__doc__, argv=argv)
     for organization in general_config['organizations']:
-
         config = get_config_for_org(general_config, organization)
 
         with make_org_directory(config, organization) as destination:
@@ -303,12 +301,13 @@ def filter_courses(courses, organization_names):
 
     return [course for course in courses if match(course)]
 
+
 def get_all_courses(**kwargs):
     log.info('Retrieving all courses')
 
     # make a set of fixed arguments, so we can memoize
     kwargs = {
-        k: v for k, v in kwargs.iteritems()
+        k: v for k, v in six.iteritems(kwargs)
         if k.startswith('django') or k == 'lms_config' or k == 'studio_config'
     }
     kwargs['dry_run'] = False  # always query for course names

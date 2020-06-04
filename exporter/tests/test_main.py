@@ -1,3 +1,6 @@
+
+import operator
+
 import mock
 
 from exporter import main, tasks
@@ -14,8 +17,8 @@ def test_get_selected_tasks_no_options_org_tasks():
 
 def test_get_selected_tasks_no_options_course_tasks():
     assert sorted([
-        task for task in tasks.DEFAULT_TASKS if issubclass(task, tasks.CourseTask)
-    ]) == sorted(main._get_selected_tasks(tasks.CourseTask, [], []))
+        task for task in tasks.DEFAULT_TASKS if issubclass(task, tasks.CourseTask)], key=operator.attrgetter('NAME')) \
+           == sorted(main._get_selected_tasks(tasks.CourseTask, [], []),  key=operator.attrgetter('NAME'))
 
 
 def test_get_selected_tasks_specified_from_options():
@@ -23,9 +26,8 @@ def test_get_selected_tasks_specified_from_options():
 
 
 def test_get_selected_tasks_excluded_tasks():
-    assert sorted(
-        set(tasks.DEFAULT_TASKS) - set([tasks.OrgEmailOptInTask])
-    ) == sorted(main._get_selected_tasks(tasks.Task, [], ['OrgEmailOptInTask']))
+    assert sorted(set(tasks.DEFAULT_TASKS) - set([tasks.OrgEmailOptInTask]), key=operator.attrgetter('NAME')) \
+           == sorted(main._get_selected_tasks(tasks.Task, [], ['OrgEmailOptInTask']), key=operator.attrgetter('NAME'))
 
 
 def test_run_tasks_happy_path():

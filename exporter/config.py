@@ -10,6 +10,7 @@ from docopt import docopt
 import yaml
 
 from exporter.util import merge, filter_keys
+import six
 
 
 WORK_SUBDIR = 'course-data'
@@ -59,7 +60,7 @@ def update_config(config, program_options):
 def merge_program_options(config, program_options):
     # get program options, removing '--' and replacing '-' with '_'
     options = {k[2:].replace('-', '_'): v for k, v
-               in program_options.iteritems()
+               in six.iteritems(program_options)
                if k.startswith('--')}
 
     config['options'] = options
@@ -104,7 +105,7 @@ def update_environments(config):
     for env in ['prod', 'edge']:
         if env in environments:
             data = environments.get(env, {})
-            for config_name, token_name in field_map.iteritems():
+            for config_name, token_name in six.iteritems(field_map):
                 data[config_name] = tokens.get(token_name)
 
             # different settings for edge
@@ -123,7 +124,7 @@ def update_organizations(config):
 
     # lowercase orgs before selection
     organizations = {org.lower(): values for org, values
-                     in config['organizations'].iteritems()}
+                     in six.iteritems(config['organizations'])}
 
     # select only organizations in arguments
     organizations = filter_keys(organizations, values.get('org'))

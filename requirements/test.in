@@ -1,0 +1,10 @@
+-c constraints.txt
+
+-r base.txt
+-r github_requirements.txt
+
+coverage
+mock
+pytest
+pytest-cov
+setuptools

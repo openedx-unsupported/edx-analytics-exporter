@@ -1,0 +1,15 @@
+-c constraints.txt
+
+awscli
+docopt
+edx-ccx-keys
+edx-opaque-keys
+graphitesend
+path.py
+pbr
+pip
+pymongo
+python-dateutil
+python-gnupg
+pyyaml
+psutil
