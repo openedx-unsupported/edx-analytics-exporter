@@ -307,7 +307,10 @@ def get_all_courses(**kwargs):
     log.info('Retrieving all courses')
 
     # make a set of fixed arguments, so we can memoize
-    kwargs = {k: v for k, v in kwargs.iteritems() if k.startswith('django')}
+    kwargs = {
+        k: v for k, v in kwargs.iteritems()
+        if k.startswith('django') or k == 'lms_config' or k == 'studio_config'
+    }
     kwargs['dry_run'] = False  # always query for course names
     kwargs['limit'] = False  # don't limit number of courses
 

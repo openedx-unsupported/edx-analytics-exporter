@@ -203,7 +203,7 @@ class DjangoAdminTask(Task):
     COMMAND = NotSet
     ARGS = NotSet
     EXT = NotSet
-    VARS = 'CONFIG_ROOT={django_config} SERVICE_VARIANT=lms'
+    VARS = 'LMS_CFG={lms_config}'
     OUT = '/dev/null'
     CMD = """
     {variables}
@@ -955,7 +955,7 @@ class CourseContentTask(CourseTask, DjangoAdminTask):
     COMMAND = 'export_olx'
     ARGS = '{course}'
     OUT = '{filename}'
-    VARS = 'CONFIG_ROOT={django_config} SERVICE_VARIANT=cms'
+    VARS = 'STUDIO_CFG={studio_config}'
     # Change CMD to use django_cms_settings.
     CMD = """
     {variables}
