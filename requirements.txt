@@ -1,8 +1,8 @@
 # Application
 awscli
 docopt
-edx-ccx-keys
-edx-opaque-keys
+edx-ccx-keys==1.1.0 # Pinned for python 2.7 compatibility
+edx-opaque-keys==2.1.1 # Pinned for python 2.7 compatibility
 graphitesend==0.10.0 # Apache
 path.py
 pbr
