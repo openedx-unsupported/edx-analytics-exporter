@@ -152,30 +152,39 @@ def log_file_contents(log_func, file_handle):
 BASE_RETRY_DELAY_IN_SECONDS = 5
 
 
-def _retry_execute_shell(cmd, attempt, max_tries, **additional_args):
-    try:
-        return_val = subprocess.check_call(cmd, shell=True, **additional_args)
-        return return_val
-    except subprocess.CalledProcessError as exception:
-        if attempt >= max_tries:
-            raise
+def _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string=None):
+    # If stdin_string is provided, open a pipe and connect it to stdin so that we can pass data into the subprocess.
+    if stdin_string:
+        process = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, **popen_args)
+    else:
+        process = subprocess.Popen(cmd, shell=True, **popen_args)
 
-        log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
-        attempt += 1
-        exponential_delay = BASE_RETRY_DELAY_IN_SECONDS * (2 ** attempt)
-        log.info("Waiting %d seconds before attempting retry %d", exponential_delay, attempt)
-        time.sleep(exponential_delay)
+    process.communicate(input=stdin_string)
 
-        log.info("Retrying command: attempt %d", attempt)
-        return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
+    if process.returncode == 0:
+        return 0
+
+    if attempt >= max_tries:
+        print "Error: Command '{}' returned non-zero exit status {}".format(cmd, process.returncode)
+        print process.stderr
+        raise subprocess.CalledProcessError(returncode=process.returncode, cmd=cmd, output=process.stderr)
+
+    log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
+    attempt += 1
+    exponential_delay = BASE_RETRY_DELAY_IN_SECONDS * (2 ** attempt)
+    log.info("Waiting %d seconds before attempting retry %d", exponential_delay, attempt)
+    time.sleep(exponential_delay)
+
+    log.info("Retrying command: attempt %d", attempt)
+    return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
 
 
-def execute_shell(cmd, **kwargs):
-    additional_args = {}
+def execute_shell(cmd, stdin_string=None, **kwargs):
+    popen_args = {}
     if 'stdout_file' in kwargs:
-        additional_args['stdout'] = kwargs['stdout_file']
+        popen_args['stdout'] = kwargs['stdout_file']
     if 'stderr_file' in kwargs:
-        additional_args['stderr'] = kwargs['stderr_file']
+        popen_args['stderr'] = kwargs['stderr_file']
 
     attempt = 1
     if 'max_tries' in kwargs:
@@ -183,4 +192,4 @@ def execute_shell(cmd, **kwargs):
     else:
         max_tries = 1
 
-    return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
+    return _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string=stdin_string)
