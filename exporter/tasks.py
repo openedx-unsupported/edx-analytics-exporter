@@ -464,24 +464,24 @@ class AuthUserProfileTask(CourseTask, SQLTask):
     NAME = 'auth_userprofile'
     SQL = """
     SELECT auth_userprofile.id,
-        1 as allow_certificate,
-        auth_userprofile.bio,
-        auth_userprofile.city,       
-        auth_userprofile.country,
+        auth_userprofile.user_id,
+        auth_userprofile.name,
+        auth_userprofile.language,
+        auth_userprofile.location,
+        auth_userprofile.meta,
         auth_userprofile.courseware,
         auth_userprofile.gender,
-        auth_userprofile.goals,
-        auth_userprofile.language,
-        auth_userprofile.level_of_education,
-        auth_userprofile.location,
         auth_userprofile.mailing_address,
-        auth_userprofile.meta,
-        auth_userprofile.name,
-        auth_userprofile.phone_number,
+        auth_userprofile.year_of_birth,
+        auth_userprofile.level_of_education,
+        auth_userprofile.goals,
+        1 as allow_certificate,
+        auth_userprofile.country,
+        auth_userprofile.city,       
+        auth_userprofile.bio,
         auth_userprofile.profile_image_uploaded_at,
-        auth_userprofile.state,
-        auth_userprofile.user_id,
-        auth_userprofile.year_of_birth
+        auth_userprofile.phone_number,
+        auth_userprofile.state
     FROM auth_userprofile
     INNER JOIN student_courseenrollment ON student_courseenrollment.user_id = auth_userprofile.user_id
     AND student_courseenrollment.course_id = '{course}'
