@@ -479,8 +479,7 @@ class AuthUserProfileTask(CourseTask, SQLTask):
         auth_userprofile.city,       
         auth_userprofile.bio,
         auth_userprofile.profile_image_uploaded_at,
-        auth_userprofile.state,
-        auth_userprofile.phone_number
+        auth_userprofile.state
     FROM auth_userprofile
     INNER JOIN student_courseenrollment ON student_courseenrollment.user_id = auth_userprofile.user_id
     AND student_courseenrollment.course_id = '{course}'
