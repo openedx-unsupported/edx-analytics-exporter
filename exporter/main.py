@@ -54,7 +54,6 @@ import gnupg
 from opaque_keys.edx.keys import CourseKey
 
 from exporter.config import setup, get_config_for_org, get_config_for_env
-from exporter.metrics import collect_elapsed_time
 from exporter.tasks import OrgTask, CourseTask
 from exporter.tasks import FindAllCoursesTask
 from exporter.tasks import FatalTaskError
@@ -147,8 +146,7 @@ def _run_task(task, **kwargs):
     log.info("Running task %s", task.__name__)
     filename = task.get_filename(**kwargs)
     try:
-        with collect_elapsed_time(task, **kwargs), \
-             logging_streams_on_failure(task.__name__) as (output_file, error_file):
+        with logging_streams_on_failure(task.__name__) as (output_file, error_file):
             task.run(filename, stderr_file=error_file, stdout_file=output_file, **kwargs)
             log.info('Saving task results to %s', filename)
             return filename
