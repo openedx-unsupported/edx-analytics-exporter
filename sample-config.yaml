@@ -19,9 +19,6 @@ defaults:
   sql_user: the_sql_user
   sql_db: the_sql_db
   monitor: false
-  graphite_host: localhost
-  graphite_port: 8125
-  graphite_prefix: edx.analytics.research
 
 environments:
   prod:
