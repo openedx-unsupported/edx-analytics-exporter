@@ -48,6 +48,7 @@ import os
 import sys
 import subprocess
 import tempfile
+import boto3
 
 import gnupg
 
@@ -242,18 +243,19 @@ def upload_data(config, filepath):
     bucket = config['output_bucket']
     prefix = config['output_prefix'] or ''
     name = os.path.basename(filepath)
-    target = 's3://{bucket}/{prefix}{name}'.format(bucket=bucket, prefix=prefix, name=name)
+    target = '{prefix}{name}'.format(prefix=prefix, name=name)
 
-    log.info('Uploading file %s to %s', filepath, target)
-
-    cmd = 'aws s3 cp --acl bucket-owner-full-control {filepath} {target}'
-    cmd = cmd.format(filepath=filepath, target=target)
+    log.info('Uploading file %s to %s/%s', filepath, bucket, target)
 
     if not config['dry_run']:
-        local_kwargs = {'max_tries': MAX_TRIES_FOR_DATA_UPLOAD}
-        execute_shell(cmd, **local_kwargs)
-    else:
-        log.info('cmd: %s', cmd)
+        for attempt in range(MAX_TRIES_FOR_DATA_UPLOAD):
+            try:
+                s3_client = boto3.client('s3')
+                s3_client.upload_file(filepath, bucket, target)
+            except:
+                continue
+            else:
+                break
 
     return target
 

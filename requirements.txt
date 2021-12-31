@@ -1,5 +1,5 @@
 # Application
-awscli
+boto3
 docopt
 edx-ccx-keys
 edx-opaque-keys

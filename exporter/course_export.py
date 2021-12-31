@@ -38,10 +38,10 @@ Options:
 from contextlib import contextmanager
 import datetime
 import os
-import subprocess
 import logging
 import logging.config
 import re
+import boto3
 
 from opaque_keys.edx.keys import CourseKey
 
@@ -110,23 +110,19 @@ def upload_files(config, results_directory):
     for filename in os.listdir(results_directory):
         filepath = os.path.join(results_directory, filename)
 
-        target = 's3://{bucket}/{prefix}{course}/state/{date}/{name}'.format(
-            bucket=bucket,
+        target = '{prefix}{course}/state/{date}/{name}'.format(
             prefix=prefix,
             course=filename_safe_course_id,
             date=output_date,
             name=filename
         )
 
-        log.info('Uploading file %s to %s', filepath, target)
-
-        cmd = 'aws s3 cp --acl bucket-owner-full-control {filepath} {target}'
-        cmd = cmd.format(filepath=filepath, target=target)
+        log.info('Uploading file %s to %s/%s', filepath, bucket, target)
 
         if not config['dry_run']:
-            subprocess.check_call(cmd, shell=True)
-        else:
-            log.info('cmd: %s', cmd)
+            s3_client = boto3.client('s3')
+            s3_client.upload_file(filepath, bucket, target)
+
 
 @contextmanager
 def make_course_directory(config, course):

@@ -20,9 +20,8 @@ Options:
 import datetime
 import logging
 import os
-import json
-import subprocess
 import sys
+import boto3
 
 from exporter.config import setup, get_config_for_org
 
@@ -96,11 +95,10 @@ def check_export(general_config):
 
 
 def get_bucket_file_list(bucket):
-    response = subprocess.check_output("aws s3api list-objects --bucket {}".format(bucket), shell=True)
-    # Output is a JSON blob with a "Contents" field which is an array of structures that describe each file
-    parsed_response = json.loads(response)
+    s3_client = boto3.client('s3')
+    response = s3_client.list_objects_v2(Bucket=bucket)
     metadata_list = []
-    for obj in parsed_response['Contents']:
+    for obj in response['Contents']:
         # Parse each object and add it to the list if it is relevant
         metadata = ExportedFileMetadata.from_json(bucket, obj)
         if metadata:
@@ -131,7 +129,7 @@ class ExportedFileMetadata(object):
             return None
 
         kwargs['size'] = obj['Size']
-        kwargs['timestamp'] = datetime.datetime.strptime(obj['LastModified'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        kwargs['timestamp'] = obj['LastModified']
 
         return ExportedFileMetadata(**kwargs)
 
