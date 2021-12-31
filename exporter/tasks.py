@@ -4,6 +4,9 @@ import logging
 import os
 import boto3
 import botocore
+import json
+from bson.json_util import dumps
+from pymongo import MongoClient
 
 from opaque_keys.edx.keys import CourseKey
 
@@ -168,35 +171,35 @@ class MongoTask(Task):
     NAME = NotSet
     QUERY = NotSet
     EXT = 'mongo'
-    CMD = """
-    mongoexport
-      --host {mongo_host}
-      --db {mongo_db}
-      --username {mongo_user}
-      --collection {mongo_collection}
-      --query '{query}'
-      --slaveOk
-      --out {filename}
-      >&2
-    """
+
+    @classmethod
+    def constructMongoURI(*args, **kwargs):
+        uri = "mongodb://"
+        
+        if kwargs.get("mongo_user") and kwargs.get("mongo_password"):
+            uri = f"{uri}{kwargs.get('mongo_user').strip()}:{kwargs.get('mongo_password').strip()}@"
+
+        return f"{uri}{kwargs.get('mongo_host')}/{kwargs.get('mongo_db')}"
 
     @classmethod
     def run(cls, filename, dry_run, **kwargs):
         super(MongoTask, cls).run(filename, dry_run, **kwargs)
 
+        mongo_uri = cls.constructMongoURI(**kwargs)
+
         query = clean_command(cls.QUERY).format(**kwargs)
 
         log.debug(query)
 
-        cmd = clean_command(cls.CMD)
-        cmd = cmd.format(filename=filename, query=query, **kwargs)
-
         if dry_run:
             print('MONGO: {0}'.format(query))
         else:
-            # For some reason, if mongoexport receives EOF before a newline, it panics.  So we need to add it manually:
-            stdin_string = kwargs['mongo_password'] + "\n"
-            execute_shell(cmd, stdin_string=stdin_string, **kwargs)
+            collection = MongoClient(mongo_uri)[kwargs.get("mongo_db")][kwargs.get("mongo_collection")]
+            cursor = collection.find(json.loads(query))
+            with open(filename, 'w') as file:
+                for document in cursor:
+                    file.write(dumps(document))
+                    file.write("\n")
 
 
 class DjangoAdminTask(Task):
