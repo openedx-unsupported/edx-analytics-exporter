@@ -142,7 +142,7 @@ class SQLTask(Task):
         log.debug(query)
 
         if dry_run:
-            print 'SQL: {0}'.format(query)
+            print('SQL: {0}'.format(query))
         else:
             mysql_query = MysqlDumpQueryToTSV(kwargs.get('sql_host'), kwargs.get('sql_user'), kwargs.get('sql_password'), kwargs.get('sql_db'), filename)
             mysql_query.execute(query)
@@ -192,7 +192,7 @@ class MongoTask(Task):
         cmd = cmd.format(filename=filename, query=query, **kwargs)
 
         if dry_run:
-            print 'MONGO: {0}'.format(query)
+            print('MONGO: {0}'.format(query))
         else:
             # For some reason, if mongoexport receives EOF before a newline, it panics.  So we need to add it manually:
             stdin_string = kwargs['mongo_password'] + "\n"
@@ -266,9 +266,9 @@ class CopyS3FileTask(Task):
         )
 
         if dry_run:
-            print 'Copy S3 File: {0} to {1}'.format(
+            print('Copy S3 File: {0} to {1}'.format(
                 s3_source_filename,
-                filename)
+                filename))
         else:
             # First check to see that the export data was successfully generated
             # by looking for a marker file for that run. Return a more severe failure,

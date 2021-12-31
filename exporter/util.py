@@ -51,7 +51,7 @@ def filter_keys(mapping, keys):
     if keys:
         result = {k: {} for k in keys}
         result.update({k: v for k, v
-                       in mapping.iteritems()
+                       in mapping.items()
                        if k in keys})
     else:
         result = mapping.copy()
@@ -165,8 +165,8 @@ def _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string=None)
         return 0
 
     if attempt >= max_tries:
-        print "Error: Command '{}' returned non-zero exit status {}".format(cmd, process.returncode)
-        print process.stderr
+        print("Error: Command '{}' returned non-zero exit status {}".format(cmd, process.returncode))
+        print(process.stderr)
         raise subprocess.CalledProcessError(returncode=process.returncode, cmd=cmd, output=process.stderr)
 
     log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
