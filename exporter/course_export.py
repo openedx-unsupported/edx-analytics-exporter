@@ -121,7 +121,9 @@ def upload_files(config, results_directory):
 
         if not config['dry_run']:
             s3_client = boto3.client('s3')
-            s3_client.upload_file(filepath, bucket, target)
+            s3_client.upload_file(filepath, bucket, target, ExtraArgs={'ACL': 'bucket-owner-full-control'})
+        else:
+            log.info("Skipping file upload as running in dry run mode")
 
 
 @contextmanager

@@ -49,6 +49,7 @@ import sys
 import subprocess
 import tempfile
 import boto3
+import botocore
 
 import gnupg
 
@@ -61,7 +62,7 @@ from exporter.tasks import FatalTaskError
 from exporter.tasks import DEFAULT_TASKS
 from exporter.tasks import OrgEmailOptInTask
 from exporter.util import make_temp_directory, with_temp_directory
-from exporter.util import filter_keys, memoize, execute_shell
+from exporter.util import filter_keys, memoize, exponential_delay_attempt
 from exporter.util import logging_streams_on_failure
 
 
@@ -248,14 +249,26 @@ def upload_data(config, filepath):
     log.info('Uploading file %s to %s/%s', filepath, bucket, target)
 
     if not config['dry_run']:
-        for attempt in range(MAX_TRIES_FOR_DATA_UPLOAD):
+        attempt = 0
+        s3_client = boto3.client('s3')
+        while attempt < MAX_TRIES_FOR_DATA_UPLOAD:
             try:
-                s3_client = boto3.client('s3')
-                s3_client.upload_file(filepath, bucket, target)
-            except:
+                s3_client.upload_file(filepath, bucket, target, ExtraArgs={'ACL': 'bucket-owner-full-control'})
+            except botocore.exceptions.ClientError:
+                log.exception(f"Error occurred on attempt {attempt} of {MAX_TRIES_FOR_DATA_UPLOAD}")
+                attempt += 1
+
+                # Delay execution of next attempt
+                exponential_delay_attempt(attempt)
+                log.info(f"Retrying command: attempt {attempt}")
+
                 continue
             else:
                 break
+        else:
+            error_message = f"Error: Failed to upload {filepath} to {bucket}/{target}"
+            log.error(error_message)
+            raise Exception(error_message)
 
     return target
 

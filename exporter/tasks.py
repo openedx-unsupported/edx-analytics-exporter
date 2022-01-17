@@ -12,7 +12,7 @@ from opaque_keys.edx.keys import CourseKey
 
 from exporter.config import setup_logging
 from exporter.mysql_query import MysqlDumpQueryToTSV
-from exporter.util import NotSet, execute_shell
+from exporter.util import NotSet, execute_shell, exponential_delay_attempt
 
 
 setup_logging()
@@ -294,43 +294,59 @@ class CopyS3FileTask(Task):
 
             s3_client = boto3.client('s3')
 
-            for attempt in range(MAX_TRIES_FOR_MARKER_FILE_CHECK):
+            attempt = 0
+            log.info(f"Checking if marker file {s3_marker_filename} exists")
+            while attempt < MAX_TRIES_FOR_MARKER_FILE_CHECK:
                 try:
-                    log.info(f"Checking if marker file {s3_marker_filename} exsists")
                     s3_client.head_object(Bucket=kwargs['pipeline_bucket'], Key=s3_marker_filename)
                 except botocore.exceptions.ClientError as e:
-                    if (attempt + 1) < MAX_TRIES_FOR_MARKER_FILE_CHECK:
-                        continue
+                    log.exception(f"Error occurred on attempt {attempt} of {MAX_TRIES_FOR_MARKER_FILE_CHECK}")
                     error_code = e.response['Error']['Code']
                     if error_code == "404":
                         error_message = f"Unable to find success marker for export {s3_marker_filename}"
                     else:
                         error_message = f'Got {error_code} error while checking marker file'
-                    log.error(error_message)
-                    raise Exception(error_message) from e
+                    log.exception(error_message)
+                    attempt += 1
+
+                    exponential_delay_attempt(attempt)
+                    log.info(f"Retrying command: attempt {attempt}")
+
+                    continue
                 else:
                     break
+            else:
+                error_message = f"Error while checking if marker file {s3_marker_filename} exists"
+                log.error(error_message)
+                raise Exception(error_message)
 
             try:
-                log.info(f"Checking if source file {s3_source_filename} exsists")
+                log.info(f"Checking if source file {s3_source_filename} exists")
                 s3_client.head_object(Bucket=kwargs['pipeline_bucket'], Key=s3_source_filename)
             except botocore.exceptions.ClientError as e:
                 error_message = f"Unable to find success source for export {s3_source_filename}"
-                log.info(error_message)
+                log.exception(error_message)
                 raise Exception(error_message) from e
 
-            for attempt in range(MAX_TRIES_FOR_COPY_FILE_FROM_S3):
+            attempt = 0
+            log.info(f"Downloading source file {s3_source_filename} into {filename}")
+            while attempt < MAX_TRIES_FOR_COPY_FILE_FROM_S3:
                 try:
-                    log.info(f"Downloading source file {s3_source_filename} into {filename}")
                     s3_client.download_file(kwargs['pipeline_bucket'], s3_source_filename, filename)
-                except Exception as e:
-                    if (attempt + 1) < MAX_TRIES_FOR_COPY_FILE_FROM_S3:
-                        continue
-                    error_message = f"Unable to copy {s3_source_filename} to {filename}"
-                    log.error(error_message)
-                    raise Exception(error_message) from e
+                except botocore.exceptions.ClientError:
+                    log.exception(f"Error occurred on attempt {attempt} of {MAX_TRIES_FOR_COPY_FILE_FROM_S3}")
+                    attempt += 1
+
+                    exponential_delay_attempt(attempt)
+                    log.info(f"Retrying command: attempt {attempt}")
+
+                    continue
                 else:
                     break
+            else:
+                error_message = f"Unable to copy {s3_source_filename} to {filename}"
+                log.error(error_message)
+                raise Exception(error_message)
 
 
 class UserIDMapTask(CourseTask, SQLTask):

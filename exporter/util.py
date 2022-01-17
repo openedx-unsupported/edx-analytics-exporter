@@ -193,3 +193,8 @@ def execute_shell(cmd, stdin_string=None, **kwargs):
         max_tries = 1
 
     return _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string=stdin_string)
+
+def exponential_delay_attempt(attempt):
+    exponential_delay = BASE_RETRY_DELAY_IN_SECONDS * (2 ** attempt)
+    log.info(f"Waiting {exponential_delay} seconds before attempting retry {attempt}")
+    time.sleep(exponential_delay)
