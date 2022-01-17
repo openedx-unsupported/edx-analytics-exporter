@@ -175,11 +175,25 @@ class MongoTask(Task):
     @classmethod
     def constructMongoURI(*args, **kwargs):
         uri = "mongodb://"
-        
-        if kwargs.get("mongo_user") and kwargs.get("mongo_password"):
-            uri = f"{uri}{kwargs.get('mongo_user').strip()}:{kwargs.get('mongo_password').strip()}@"
 
-        return f"{uri}{kwargs.get('mongo_host')}/{kwargs.get('mongo_db')}"
+        mongo_host = kwargs.get('mongo_host')
+        mongo_user = kwargs.get('mongo_user')
+        mongo_password = kwargs.get('mongo_password')
+        mongo_auth_db = kwargs.get('mongo_auth_db')
+        mongo_options = kwargs.get('mongo_options')
+
+        if mongo_user and mongo_password:
+            uri = f"{uri}{mongo_user}:{mongo_password}@"
+
+        uri = f"{uri}{mongo_host}/"
+
+        if mongo_auth_db:
+            uri = f"{uri}{mongo_auth_db}"
+
+        if mongo_options:
+            uri = f"{uri}?{mongo_options}"
+
+        return uri
 
     @classmethod
     def run(cls, filename, dry_run, **kwargs):
@@ -191,10 +205,13 @@ class MongoTask(Task):
 
         log.debug(query)
 
+        mongo_db_name = kwargs.get("mongo_db")
+        mongo_collection = kwargs.get("mongo_collection")
+
         if dry_run:
             print('MONGO: {0}'.format(query))
         else:
-            collection = MongoClient(mongo_uri)[kwargs.get("mongo_db")][kwargs.get("mongo_collection")]
+            collection = MongoClient(mongo_uri)[mongo_db_name][mongo_collection]
             cursor = collection.find(json.loads(query))
             with open(filename, 'w') as file:
                 for document in cursor:
