@@ -30,6 +30,8 @@ def _get_config(program_options):
     merge_program_options(config, program_options)
 
     update_exclude_tasks(config)
+    
+    update_include_tasks(config)
 
     set_config_defaults(config)
 
@@ -92,6 +94,17 @@ def update_exclude_tasks(config):
         del values['exclude_task']
 
     values['exclude_tasks'] = exclude_tasks
+
+def update_include_tasks(config):
+    values = config['values']
+
+    tasks = values.get('include_task', [])
+
+    if 'include_task' in values:
+        del values['include_task']
+
+    if tasks:
+        values['tasks'] = tasks
 
 
 def get_config_for_course(config, course):

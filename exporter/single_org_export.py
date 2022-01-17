@@ -4,7 +4,7 @@
 Export course data.
 
 Usage:
-  single-org-exporter [options] [--exclude-task=<task>...]
+  single-org-exporter [options] [--exclude-task=<task>...] [--include-task=<task>...]
 
 Options:
   -h --help                  Show this screen.
@@ -34,6 +34,8 @@ Options:
   --mongo-password=<password>       The mongo password to connect
   --mongo-db=<db>                   The mongo db to query
   --mongo-collection=<collection>   The mongo collection to query
+  --mongo-auth-db=<auth-db>         The mongo auth db
+  --mongo-options=<options>         Mongo connection string options
 
   --sql-host=<host>         The sql db host
   --sql-user=<user>         The sql username for login to db
@@ -45,6 +47,8 @@ Options:
   --organization=<org-name> The name of the organization
 
   --exclude-task=<task>     Specify task NOT to run.
+
+  --include-task=<task>     Specify task to run. If nothing specified, all tasks are run.
 """
 
 
