@@ -69,7 +69,7 @@ log = logging.getLogger(__name__)
 
 # pylint: disable=missing-docstring
 
-
+GPGBINARY = 'gpg2'
 MAX_TRIES_FOR_DATA_UPLOAD = 5
 
 
@@ -171,7 +171,7 @@ def encrypt_files(config, filenames, temp_directory=None):
         recipients.append(config['gpg_master_key'])
 
     # user the temp directory, if specified, to store the keyring
-    gpg = gnupg.GPG(gnupghome=temp_directory)
+    gpg = gnupg.GPG(gpgbinary=GPGBINARY, gnupghome=temp_directory)
     gpg_key_dir = config['gpg_keys']
     gpg.encoding = 'utf-8'
 
