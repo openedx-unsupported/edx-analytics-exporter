@@ -953,8 +953,8 @@ class ForumsTask(CourseTask, MongoTask):
 class FindAllCoursesTask(DjangoAdminTask):
     NAME = 'courses'
     EXT = 'txt'
-    COMMAND = 'dump_course_ids'
-    ARGS = ''
+    COMMAND = 'dump_course_ids_with_filter'
+    ARGS = '--end {end}'
     OUT = '{filename}'
 
 
