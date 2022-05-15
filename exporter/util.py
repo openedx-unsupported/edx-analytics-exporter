@@ -166,6 +166,7 @@ def _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string=None)
 
     if attempt >= max_tries:
         print "Error: Command '{}' returned non-zero exit status {}".format(cmd, process.returncode)
+        print process.stdout
         print process.stderr
         raise subprocess.CalledProcessError(returncode=process.returncode, cmd=cmd, output=process.stderr)
 

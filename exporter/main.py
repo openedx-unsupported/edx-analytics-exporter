@@ -323,7 +323,8 @@ def _find_all_courses(**kwargs):
     with tempfile.NamedTemporaryFile() as temp:
         with logging_streams_on_failure('Find All Courses') as (output_file, error_file):
             try:
-                FindAllCoursesTask.run(temp.name, stderr_file=error_file, stdout_file=output_file, **kwargs)
+                #FindAllCoursesTask.run(temp.name, stderr_file=error_file, stdout_file=output_file, **kwargs)
+                FindAllCoursesTask.run(temp.name, **kwargs)
             except:  # pylint: disable=bare-except
                 courses = []
                 log.warning('Failed to retrieve list of all courses.', exc_info=True)
