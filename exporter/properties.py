@@ -27,7 +27,7 @@ Options:
   --orgs=<orgs>            Space separated list of organization identifiers.
                            Can use wildcards.
 """
-
+from __future__ import print_function
 import os.path
 import shutil
 import sys
@@ -55,7 +55,7 @@ def export_properties(config, directory, files=None, orgs=None, prefix=''):
     recreate_directory(directory)
 
     orgs = [o.lower() for o in orgs.split()] if orgs else ['*']
-    print orgs
+    print(orgs)
 
     files_data = load_files(files)
 
