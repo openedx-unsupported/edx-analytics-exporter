@@ -301,16 +301,40 @@ def filter_courses(courses, organization_names):
 
     return [course for course in courses if match(course)]
 
+
 def get_all_courses(**kwargs):
     log.info('Retrieving all courses')
-
+    # These are options that don't start with the keyword django
+    other_options = ('lms_config', 'studio_config', 'time_constraint')
     # make a set of fixed arguments, so we can memoize
     kwargs = {
         k: v for k, v in kwargs.iteritems()
-        if k.startswith('django') or k == 'lms_config' or k == 'studio_config'
+        if k.startswith('django') or k in other_options
     }
     kwargs['dry_run'] = False  # always query for course names
     kwargs['limit'] = False  # don't limit number of courses
+
+    # Extract the time constraint option and calculate the end date that
+    # should be used to limit the list of returned course IDs.
+    # Please note that the default time constraint is 3 years
+    constraint = str(kwargs.get('time_constraint', '3'))
+    try:
+        constraint = int(constraint)
+    except ValueError as e:
+        # If the given configuration value cannot be parsed into an integer,
+        # then we quit.
+        raise ValueError(
+            'The given time constraint value {c} is not a valid integer.'.format(c=constraint)
+        )
+
+    # Calculate the end date by changing today's year to 3 years ago.
+    # Note that using str on a date object returns a date string with the
+    # format %Y-%m-%d
+    today = datetime.date.today()
+    kwargs['end'] = str(today - datetime.timedelta(days=(365 * constraint)))
+    if kwargs['end']:
+        msg = 'Limiting the courses to end dates of {d} and later.'
+        log.info(msg.format(d=kwargs['end']))
 
     courses = _find_all_courses(**kwargs)
 
