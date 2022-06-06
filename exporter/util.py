@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-
+from __future__ import print_function
 import atexit
 from contextlib import contextmanager
 import functools
@@ -165,8 +165,8 @@ def _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string=None)
         return 0
 
     if attempt >= max_tries:
-        print "Error: Command '{}' returned non-zero exit status {}".format(cmd, process.returncode)
-        print process.stderr
+        print("Error: Command '{}' returned non-zero exit status {}".format(cmd, process.returncode))
+        print(process.stderr)
         raise subprocess.CalledProcessError(returncode=process.returncode, cmd=cmd, output=process.stderr)
 
     log.exception("Error occurred on attempt %d of %d", attempt, max_tries)
@@ -176,7 +176,7 @@ def _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string=None)
     time.sleep(exponential_delay)
 
     log.info("Retrying command: attempt %d", attempt)
-    return _retry_execute_shell(cmd, attempt, max_tries, **additional_args)
+    return _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string)
 
 
 def execute_shell(cmd, stdin_string=None, **kwargs):
