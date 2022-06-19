@@ -56,6 +56,7 @@ from opaque_keys.edx.keys import CourseKey
 from exporter.config import setup, get_config_for_org, get_config_for_env
 from exporter.tasks import OrgTask, CourseTask
 from exporter.tasks import FindAllCoursesTask
+from exporter.tasks import FindFilteredCoursesTask
 from exporter.tasks import FatalTaskError
 from exporter.tasks import DEFAULT_TASKS
 from exporter.tasks import OrgEmailOptInTask
@@ -314,40 +315,45 @@ def get_all_courses(**kwargs):
     kwargs['dry_run'] = False  # always query for course names
     kwargs['limit'] = False  # don't limit number of courses
 
-    # Extract the time constraint option and calculate the end date that
-    # should be used to limit the list of returned course IDs.
-    # Please note that the default time constraint is 3 years
-    constraint = str(kwargs.get('time_constraint', '3'))
-    try:
-        constraint = int(constraint)
-    except ValueError as e:
-        # If the given configuration value cannot be parsed into an integer,
-        # then we quit.
-        raise ValueError(
-            'The given time constraint value {c} is not a valid integer.'.format(c=constraint)
-        )
+    # If no time constraint config is set, then we return all courses
+    if 'time_constraint' in kwargs:
+        # Extract the time constraint option and calculate the end date that
+        # should be used to limit the list of returned course IDs.
+        # Please note that the default time constraint is 3 years
+        constraint = str(kwargs.get('time_constraint', '3'))
+        try:
+            constraint = int(constraint)
+        except ValueError as e:
+            # If the given configuration value cannot be parsed into an integer,
+            # then we quit.
+            raise ValueError(
+                'The given time constraint value {c} is not a valid integer.'.format(c=constraint)
+            )
 
-    # Calculate the end date by changing today's year to 3 years ago.
-    # Note that using str on a date object returns a date string with the
-    # format %Y-%m-%d
-    today = datetime.date.today()
-    kwargs['end'] = str(today - datetime.timedelta(days=(365 * constraint)))
-    if kwargs['end']:
-        msg = 'Limiting the courses to end dates of {d} and later.'
-        log.info(msg.format(d=kwargs['end']))
+        # Calculate the end date by changing today's year to 3 years ago.
+        # Note that using str on a date object returns a date string with the
+        # format %Y-%m-%d
+        today = datetime.date.today()
+        kwargs['end'] = str(today - datetime.timedelta(days=(365 * constraint)))
+        if kwargs['end']:
+            msg = 'Limiting the courses to end dates of {d} and later.'
+            log.info(msg.format(d=kwargs['end']))
 
-    courses = _find_all_courses(**kwargs)
-
-    return courses
+    return _find_all_courses(**kwargs)
 
 
 @memoize
 def _find_all_courses(**kwargs):
-    # get all courses using task, saving to a temp file
+    # get all courses using task, saving to a temp file.
+    FindCoursesTask = FindAllCoursesTask
+    # If the end date has been set (i.e. time_constraint is given),
+    # then use FindFilteredCoursesTask
+    if kwargs.get('end'):
+        FindCoursesTask = FindFilteredCoursesTask
     with tempfile.NamedTemporaryFile() as temp:
         with logging_streams_on_failure('Find All Courses') as (output_file, error_file):
             try:
-                FindAllCoursesTask.run(temp.name, stderr_file=error_file, stdout_file=output_file, **kwargs)
+                FindCoursesTask.run(temp.name, stderr_file=error_file, stdout_file=output_file, **kwargs)
             except:  # pylint: disable=bare-except
                 courses = []
                 log.warning('Failed to retrieve list of all courses.', exc_info=True)

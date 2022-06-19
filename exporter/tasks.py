@@ -951,6 +951,20 @@ class ForumsTask(CourseTask, MongoTask):
 
 
 class FindAllCoursesTask(DjangoAdminTask):
+    """
+    Get all courses available
+    """
+    NAME = 'courses'
+    EXT = 'txt'
+    COMMAND = 'dump_course_ids'
+    ARGS = ''
+    OUT = '{filename}'
+
+
+class FindFilteredCoursesTask(DjangoAdminTask):
+    """
+    Get a filtered list of courses using the the provided end date
+    """
     NAME = 'courses'
     EXT = 'txt'
     COMMAND = 'dump_course_ids_with_filter'
