@@ -1,8 +1,11 @@
 # pylint: disable=missing-docstring
 from __future__ import print_function
+import hashlib
 import logging
 import os
 import subprocess
+import sys
+import traceback
 import distutils
 
 from opaque_keys.edx.keys import CourseKey
@@ -32,6 +35,23 @@ def _substitute_non_ascii_chars(string):
     return substituted_string
 
 
+def _get_max_filename_length(default=255):
+    """
+    Get the system's maximum length for file name.
+    This is NOT the maximum length of the path; rather it is the maximum
+    length of the basename component of a path.
+    """
+    try:
+        # Most POSIX compliant systems should return a value
+        return os.pathconf('/', 'PC_NAME_MAX')
+    except (ValueError, AttributeError):
+        # If for some reason, PC_NAME_MAX is not a configuration
+        # name on the system, or os.pathconf is not available, then
+        # we return the given default.
+        # That default is set to 255, which is a typical limit on most systems
+        return default
+
+
 class FatalTaskError(Exception):
     """Exception marking tasks that should be treated as fatal."""
     pass
@@ -56,14 +76,42 @@ class FilenameMixin(object):
 
     @classmethod
     def get_filename_template(cls, kwargs):
+        # Get the max name length for the system and trim the given file name
+        # to make sure its length is smaller than the limit
+        max_name_length = _get_max_filename_length()
+        # Take the extension character length and pad it with 20 characters to
+        # allow dowstream processes (tar, gpg, etc.) to extend the file name.
+        possible_ext_length = len(cls.EXT or '') + 20
         template = "{entity}-{task}-{name}.{extension}"
-
-        return template.format(
+        file_name = template.format(
             entity=cls.entity_name(kwargs),
             task=cls.NAME,
             name=kwargs['name'],
             extension=cls.EXT
         )
+        # If the generate file name is shorter than the system limit minus some padding,
+        # then we can return it.
+        if len(os.path.basename(file_name)) < (max_name_length - 20):
+            return file_name
+
+        name = kwargs['name']
+        # To avoid file name clashes, we'll add the MD5 hex digest of the
+        # given name to the file name.
+        hashed_name = hashlib.md5(bytes(name)).hexdigest()
+        # Trim the long file name
+        name = name[:(max_name_length - len(hashed_name) - possible_ext_length)]
+        file_name = "{entity}-{task}-{name}".format(
+            entity=cls.entity_name(kwargs),
+            task=cls.NAME,
+            name=name,
+        )
+        file_name = file_name[:(max_name_length - len(hashed_name) - possible_ext_length)]
+        return "{fname}-{hash}.{extension}".format(
+            fname=file_name,
+            hash=hashed_name,
+            extension=cls.EXT,
+        )
+
 
     @classmethod
     def get_filename(cls, **kwargs):
@@ -77,7 +125,13 @@ class FilenameMixin(object):
 
         failed_filename = filename + '.failed'
         with open(failed_filename, 'w') as failure_file:
-            failure_file.write('An error occurred generating this file.\n')
+            # If the issue at hand is related to a raised exception,
+            # then we can print the last exception into the file.
+            # Otherwise, we restort to a generic message.
+            if all([sys.last_traceback, sys.last_type, sys.last_value]):
+                traceback.print_last(file=failure_file)
+            else:
+                failure_file.write('An error occurred generating this file.\n')
 
         return failed_filename
 
