@@ -128,8 +128,9 @@ class FilenameMixin(object):
             # If the issue at hand is related to a raised exception,
             # then we can print the last exception into the file.
             # Otherwise, we restort to a generic message.
-            if all([sys.last_traceback, sys.last_type, sys.last_value]):
-                traceback.print_last(file=failure_file)
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            if all([exc_type, exc_value, exc_tb]):
+                traceback.print_exception(exc_type, exc_value, exc_tb, file=failure_file)
             else:
                 failure_file.write('An error occurred generating this file.\n')
 
