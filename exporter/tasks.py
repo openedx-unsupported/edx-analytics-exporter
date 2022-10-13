@@ -377,17 +377,39 @@ class CopyS3FileTask(Task):
 
 
 class UserIDMapTask(CourseTask, SQLTask):
+    """
+    For all learners in a given courserun, produce a mapping of user_id to anonymous_user_id.
+
+    This query determines the anonymous_user_id by simply doing a lookup in the student_anonymoususerid cache table.
+    This table serves as a permanent memory about what the anonymous ID of a user is, even if the hashing algorithm or
+    secret key salts change over time.  Once generated and cached, an anonymous_user_id is attributed to a user forever,
+    so this table is the only source of truth for the mapping output required by this task.
+
+    Notes:
+    * Retired users are included in the output, with their usernames redacted just like in auth_user.  This is expected
+      and intentional.
+    * The query specifies `where sau.course_id = ''`, because student_anonymoususerid contains not only generic
+      anonymous user IDs (what we want), but also course-specific anonymous user IDs (NOT what we want), so we must
+      filter out the latter group.
+
+    Caveats:
+    * Every course seems to have this non-human in the output: course_discovery_worker.  This probably seems bizzare to
+      the partners which consume this output, but there was no trivial way for me to determine how to exclude non-human-
+      (a.k.a. service-) users, so I'll just leave it like this until we get pushback.  AFAIK, it's already been like
+      this for nearly a decade.
+    """
     NAME = 'user_id_map'
     SQL = """
-    SELECT CAST(md5(concat('{secret_key}', au0.id)) AS CHAR) hash_id,
-           au0.id,
-           au0.username
-    FROM {sql_db}.auth_user au0
-    WHERE au0.id IN
-        (SELECT DISTINCT(auth_user.id) USER_ID
-         FROM {sql_db}.auth_user
-         INNER JOIN student_courseenrollment ON {sql_db}.student_courseenrollment.USER_ID = auth_user.id
-         WHERE course_id='{course}')
+              select sau.anonymous_user_id as hash_id,
+                     sau.user_id,
+                     au.username
+                from {sql_db}.student_anonymoususerid as sau
+          inner join {sql_db}.auth_user as au
+                     on sau.user_id = au.id
+          inner join {sql_db}.student_courseenrollment as sce
+                     on sce.user_id = au.id
+               where sau.course_id = ''
+                     and sce.course_id = '{course}'
     """
 
 
