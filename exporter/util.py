@@ -100,7 +100,7 @@ def with_temp_directory(*d_args, **d_kwargs):
     def wrap(func):
         @functools.wraps(func)
         def wrapped(*args):
-            if func.func_code.co_argcount - len(args) == 1:
+            if func.__code__.co_argcount - len(args) == 1:
                 with make_temp_directory(*d_args, **d_kwargs) as temp_dir:
                     args += (temp_dir,)
                     return func(*args)
