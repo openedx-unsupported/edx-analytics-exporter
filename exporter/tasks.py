@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from __future__ import print_function
+
 import hashlib
 import logging
 import os
@@ -1079,9 +1079,9 @@ class OrgEmailOptInTask(OrgTask, DjangoAdminTask):
     NAME = 'email_opt_in'
     EXT = 'csv'
     COMMAND = 'email_opt_in_list'
-    ARGS = u'{all_organizations} --courses={comma_sep_courses} --email-optin-chunk-size=10000'
+    ARGS = '{all_organizations} --courses={comma_sep_courses} --email-optin-chunk-size=10000'
     OUT = '{filename}'
-    CMD = u"""
+    CMD = """
     {variables}
       {django_admin} {command}
       --settings={django_settings}
