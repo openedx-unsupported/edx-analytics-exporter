@@ -51,7 +51,7 @@ def filter_keys(mapping, keys):
     if keys:
         result = {k: {} for k in keys}
         result.update({k: v for k, v
-                       in mapping.iteritems()
+                       in mapping.items()
                        if k in keys})
     else:
         result = mapping.copy()

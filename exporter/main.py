@@ -309,7 +309,7 @@ def get_all_courses(**kwargs):
     other_options = ('lms_config', 'studio_config', 'time_constraint')
     # make a set of fixed arguments, so we can memoize
     kwargs = {
-        k: v for k, v in kwargs.iteritems()
+        k: v for k, v in kwargs.items()
         if k.startswith('django') or k in other_options
     }
     kwargs['dry_run'] = False  # always query for course names
