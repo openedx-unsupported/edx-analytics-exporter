@@ -120,7 +120,7 @@ def _get_selected_tasks(task_cls, tasks_from_options, excluded_tasks):
     excluded_task_names = {name.lower() for name in excluded_tasks}
     filtered_tasks = filter_keys(available_tasks, requested_task_names)
     return [
-        task for (task_name, task) in filtered_tasks.items()
+        task for (task_name, task) in list(filtered_tasks.items())
         if task and task_name not in excluded_task_names
     ]
 
@@ -309,7 +309,7 @@ def get_all_courses(**kwargs):
     other_options = ('lms_config', 'studio_config', 'time_constraint')
     # make a set of fixed arguments, so we can memoize
     kwargs = {
-        k: v for k, v in kwargs.items()
+        k: v for k, v in list(kwargs.items())
         if k.startswith('django') or k in other_options
     }
     kwargs['dry_run'] = False  # always query for course names

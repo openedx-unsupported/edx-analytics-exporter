@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from __future__ import print_function
+
 import atexit
 from contextlib import contextmanager
 import functools
@@ -20,8 +20,8 @@ class MetaNotSet(type):
         raise ValueError("Value not set in child class")
 
 
-class NotSet(object):
-    __metaclass__ = MetaNotSet
+class NotSet(object, metaclass=MetaNotSet):
+    pass
 
 
 # Dictionary utilities
@@ -51,7 +51,7 @@ def filter_keys(mapping, keys):
     if keys:
         result = {k: {} for k in keys}
         result.update({k: v for k, v
-                       in mapping.items()
+                       in list(mapping.items())
                        if k in keys})
     else:
         result = mapping.copy()
