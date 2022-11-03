@@ -28,12 +28,12 @@ def setup(doc, argv=None):
 
 def _get_config(program_options):
     with open(program_options['<config>']) as f:
-        config = yaml.load(f)
+        config = yaml.full_load(f)
 
     if '<org-config>' in program_options:
         # org-config is not passed in separately for all jobs and is not available to jobs that run as a "slave"
         with open(program_options['<org-config>']) as f:
-            org_config = yaml.load(f)
+            org_config = yaml.full_load(f)
 
         config['organizations'] = org_config['organizations']
 
