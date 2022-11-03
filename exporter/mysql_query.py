@@ -59,4 +59,4 @@ class MysqlDumpQueryToTSV(object):
 
     def _normalize_value(self, value):
         if value is None: value='NULL'
-        return str(value).encode('utf-8').replace('\\', '\\\\').replace('\r', '\\r').replace('\t','\\t').replace('\n', '\\n')
+        return str(value).replace('\\', '\\\\').replace('\r', '\\r').replace('\t','\\t').replace('\n', '\\n').encode('utf-8')
