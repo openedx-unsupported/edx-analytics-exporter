@@ -155,7 +155,7 @@ BASE_RETRY_DELAY_IN_SECONDS = 5
 def _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string=None):
     # If stdin_string is provided, open a pipe and connect it to stdin so that we can pass data into the subprocess.
     if stdin_string:
-        process = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, **popen_args)
+        process = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, **popen_args,text=True)
     else:
         process = subprocess.Popen(cmd, shell=True, **popen_args)
 
