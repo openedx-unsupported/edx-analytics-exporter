@@ -26,7 +26,7 @@ def test_org_email_opt_in_task(mock_execute_shell):
     kwargs = {
         'organization': 'the-org',
         'other_names': ['the-second-org', 'the-third-org'],
-        'courses': ['course-1', u'coursé-2'],
+        'courses': ['course-1', 'coursé-2'],
         'lms_config': 'the-lms-config',
         'studio_config': 'the-studio-config',
         'django_admin': 'the-django-admin',
@@ -38,11 +38,11 @@ def test_org_email_opt_in_task(mock_execute_shell):
 
     command = tasks.OrgEmailOptInTask.run(filename, dry_run, **kwargs)
 
-    assert command.endswith(u'the-filename the-org the-second-org the-third-org --courses=course-1,coursé-2 --email-optin-chunk-size=10000')
+    assert command.endswith('the-filename the-org the-second-org the-third-org --courses=course-1,coursé-2 --email-optin-chunk-size=10000')
     assert 'email_opt_in_list' in command
     expected_kwargs = deepcopy(kwargs)
     expected_kwargs['all_organizations'] = 'the-org the-second-org the-third-org'
-    expected_kwargs['comma_sep_courses'] = u'course-1,coursé-2'
+    expected_kwargs['comma_sep_courses'] = 'course-1,coursé-2'
     expected_kwargs['max_tries'] = 3
     mock_execute_shell.assert_called_once_with(command, **expected_kwargs)
 
@@ -69,7 +69,7 @@ def test_get_non_ascii_filename_course_task():
     kwargs = {
         'name': 'test-analytics',
         'work_dir': '/tmp/workdir/',
-        'course': u'course-v1:edX+DemoX+Démo_Course',
+        'course': 'course-v1:edX+DemoX+Démo_Course',
     }
     assert '/tmp/workdir/edX-DemoX-D_mo_Course-test_course_task-test-analytics.csv' == TestCourseTask.get_filename(**kwargs)
 
