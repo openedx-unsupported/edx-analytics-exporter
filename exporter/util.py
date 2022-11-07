@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from __future__ import print_function
+
 import atexit
 from contextlib import contextmanager
 import functools
@@ -51,7 +51,7 @@ def filter_keys(mapping, keys):
     if keys:
         result = {k: {} for k in keys}
         result.update({k: v for k, v
-                       in mapping.items()
+                       in list(mapping.items())
                        if k in keys})
     else:
         result = mapping.copy()
@@ -100,7 +100,7 @@ def with_temp_directory(*d_args, **d_kwargs):
     def wrap(func):
         @functools.wraps(func)
         def wrapped(*args):
-            if func.func_code.co_argcount - len(args) == 1:
+            if func.__code__.co_argcount - len(args) == 1:
                 with make_temp_directory(*d_args, **d_kwargs) as temp_dir:
                     args += (temp_dir,)
                     return func(*args)
@@ -155,7 +155,7 @@ BASE_RETRY_DELAY_IN_SECONDS = 5
 def _retry_execute_shell(cmd, attempt, max_tries, popen_args, stdin_string=None):
     # If stdin_string is provided, open a pipe and connect it to stdin so that we can pass data into the subprocess.
     if stdin_string:
-        process = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, **popen_args)
+        process = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, **popen_args,encoding='utf-8')
     else:
         process = subprocess.Popen(cmd, shell=True, **popen_args)
 

@@ -28,12 +28,12 @@ def setup(doc, argv=None):
 
 def _get_config(program_options):
     with open(program_options['<config>']) as f:
-        config = yaml.load(f)
+        config = yaml.full_load(f)
 
     if '<org-config>' in program_options:
         # org-config is not passed in separately for all jobs and is not available to jobs that run as a "slave"
         with open(program_options['<org-config>']) as f:
-            org_config = yaml.load(f)
+            org_config = yaml.full_load(f)
 
         config['organizations'] = org_config['organizations']
 
@@ -59,7 +59,7 @@ def update_config(config, program_options):
 def merge_program_options(config, program_options):
     # get program options, removing '--' and replacing '-' with '_'
     options = {k[2:].replace('-', '_'): v for k, v
-               in program_options.items()
+               in list(program_options.items())
                if k.startswith('--')}
 
     config['options'] = options
@@ -104,7 +104,7 @@ def update_environments(config):
     for env in ['prod', 'edge']:
         if env in environments:
             data = environments.get(env, {})
-            for config_name, token_name in field_map.items():
+            for config_name, token_name in list(field_map.items()):
                 data[config_name] = tokens.get(token_name)
 
             # different settings for edge
@@ -123,7 +123,7 @@ def update_organizations(config):
 
     # lowercase orgs before selection
     organizations = {org.lower(): values for org, values
-                     in config['organizations'].items()}
+                     in list(config['organizations'].items())}
 
     # select only organizations in arguments
     organizations = filter_keys(organizations, values.get('org'))
