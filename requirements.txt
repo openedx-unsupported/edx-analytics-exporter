@@ -6,7 +6,7 @@ edx-opaque-keys==2.1.1 # Pinned for python 2.7 compatibility
 graphitesend==0.10.0 # Apache
 path.py
 pbr
-pip==19.2.3		
+pip==21.1		
 pymongo
 python-dateutil
 python-gnupg==0.3.6
