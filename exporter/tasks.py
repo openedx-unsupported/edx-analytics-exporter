@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from __future__ import print_function
+
 import hashlib
 import logging
 import os
@@ -97,7 +97,7 @@ class FilenameMixin(object):
         name = kwargs['name']
         # To avoid file name clashes, we'll add the MD5 hex digest of the
         # given name to the file name.
-        hashed_name = hashlib.md5(bytes(name)).hexdigest()
+        hashed_name = hashlib.md5(bytes(name,'utf-8')).hexdigest()
         # Trim the long file name
         name = name[:(max_name_length - len(hashed_name) - possible_ext_length)]
         file_name = "{entity}-{task}-{name}".format(
@@ -1079,9 +1079,9 @@ class OrgEmailOptInTask(OrgTask, DjangoAdminTask):
     NAME = 'email_opt_in'
     EXT = 'csv'
     COMMAND = 'email_opt_in_list'
-    ARGS = u'{all_organizations} --courses={comma_sep_courses} --email-optin-chunk-size=10000'
+    ARGS = '{all_organizations} --courses={comma_sep_courses} --email-optin-chunk-size=10000'
     OUT = '{filename}'
-    CMD = u"""
+    CMD = """
     {variables}
       {django_admin} {command}
       --settings={django_settings}

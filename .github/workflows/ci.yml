@@ -17,8 +17,8 @@ jobs:
         os:
           - ubuntu-20.04
         python-version:
-          - 2.7
-        toxenv: [py27]
+          - 3.8
+        toxenv: [py38]
     steps:
       - uses: actions/checkout@v1
       - name: setup python
