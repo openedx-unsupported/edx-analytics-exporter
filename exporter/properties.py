@@ -27,7 +27,7 @@ Options:
   --orgs=<orgs>            Space separated list of organization identifiers.
                            Can use wildcards.
 """
-from __future__ import print_function
+
 import os.path
 import shutil
 import sys

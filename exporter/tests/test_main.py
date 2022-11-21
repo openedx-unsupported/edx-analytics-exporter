@@ -14,8 +14,8 @@ def test_get_selected_tasks_no_options_org_tasks():
 
 def test_get_selected_tasks_no_options_course_tasks():
     assert sorted([
-        task for task in tasks.DEFAULT_TASKS if issubclass(task, tasks.CourseTask)
-    ]) == sorted(main._get_selected_tasks(tasks.CourseTask, [], []))
+        str(task) for task in tasks.DEFAULT_TASKS if issubclass(task, tasks.CourseTask)
+    ]) == sorted(list(map(str,main._get_selected_tasks(tasks.CourseTask, [], []))))
 
 
 def test_get_selected_tasks_specified_from_options():
@@ -24,8 +24,8 @@ def test_get_selected_tasks_specified_from_options():
 
 def test_get_selected_tasks_excluded_tasks():
     assert sorted(
-        set(tasks.DEFAULT_TASKS) - set([tasks.OrgEmailOptInTask])
-    ) == sorted(main._get_selected_tasks(tasks.Task, [], ['OrgEmailOptInTask']))
+        map(str,set(tasks.DEFAULT_TASKS) - set([tasks.OrgEmailOptInTask]))
+    ) == sorted(list(map(str,main._get_selected_tasks(tasks.Task, [], ['OrgEmailOptInTask']))))
 
 
 def test_run_tasks_happy_path():
