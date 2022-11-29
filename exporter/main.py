@@ -67,6 +67,9 @@ from exporter.util import logging_streams_on_failure
 
 log = logging.getLogger(__name__)
 
+from signal import signal, SIGPIPE, SIG_DFL  
+signal(SIGPIPE,SIG_DFL)
+
 
 # pylint: disable=missing-docstring
 
