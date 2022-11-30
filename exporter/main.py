@@ -195,7 +195,7 @@ def encrypt_files(config, filenames, temp_directory=None):
         log.info('Encrypting file %s', filepath)
         encrypted_filepath = '{0}.gpg'.format(filepath)
         if not dry_run:
-            with open(filepath,'rb') as input_file:
+            with open(filepath) as input_file:
                 gpg.encrypt_file(
                     input_file,
                     recipients,
