@@ -9,7 +9,7 @@ pbr
 pip==19.2.3		
 pymongo
 python-dateutil
-python-gnupg==0.3.6
+python-gnupg==0.4.6
 pyyaml
 psutil
 
