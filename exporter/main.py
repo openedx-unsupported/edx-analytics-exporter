@@ -180,7 +180,7 @@ def encrypt_files(config, filenames, temp_directory=None):
         # import recipient gpg key
         log.info('Using gpg key for %s', recipient)
         gpg_key_file = os.path.join(gpg_key_dir, recipient)
-        with open(gpg_key_file, 'r') as gpg_key_file:
+        with open(gpg_key_file, 'rb') as gpg_key_file:
             gpg.import_keys(gpg_key_file.read())
 
     results = []
