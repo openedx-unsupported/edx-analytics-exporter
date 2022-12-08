@@ -171,6 +171,9 @@ def encrypt_files(config, filenames, temp_directory=None):
     if 'gpg_master_key' in config:
         recipients.append(config['gpg_master_key'])
 
+    # Set the logging level to DEBUG
+    logging.basicConfig(level=logging.DEBUG)    
+
     # user the temp directory, if specified, to store the keyring
     gpg = gnupg.GPG(gnupghome=temp_directory)
     gpg_key_dir = config['gpg_keys']
@@ -180,7 +183,7 @@ def encrypt_files(config, filenames, temp_directory=None):
         # import recipient gpg key
         log.info('Using gpg key for %s', recipient)
         gpg_key_file = os.path.join(gpg_key_dir, recipient)
-        with open(gpg_key_file, 'rb') as gpg_key_file:
+        with open(gpg_key_file, 'r') as gpg_key_file:
             gpg.import_keys(gpg_key_file.read())
 
     results = []
@@ -200,6 +203,8 @@ def encrypt_files(config, filenames, temp_directory=None):
                     output=encrypted_filepath,
                     armor=False,
                 )
+            # Use the logging.debug() method to log debug messages
+            logging.debug("gnupg module version: %s", gpg.version)    
             # delete original file even if it was not encrypted
             os.remove(filepath)
         else:
