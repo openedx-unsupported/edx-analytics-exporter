@@ -72,6 +72,7 @@ log = logging.getLogger(__name__)
 
 
 MAX_TRIES_FOR_DATA_UPLOAD = 5
+MAX_TRIES_FOR_FILE_ENCRYPTION = 5
 
 
 def main(argv=None):
@@ -192,14 +193,21 @@ def encrypt_files(config, filenames, temp_directory=None):
         log.info('Encrypting file %s', filepath)
         encrypted_filepath = '{0}.gpg'.format(filepath)
         if not dry_run:
-            with open(filepath,'rb') as input_file:
-                gpg.encrypt_file(
-                    input_file,
-                    recipients,
-                    always_trust=True,
-                    output=encrypted_filepath,
-                    armor=False,
-                )
+            retires=0
+            while retires<=MAX_TRIES_FOR_FILE_ENCRYPTION:
+                try:
+                    with open(filepath,'rb') as input_file:
+                        gpg.encrypt_file(
+                        input_file,
+                        recipients,
+                        always_trust=True,
+                        output=encrypted_filepath,
+                        armor=False,
+                    )
+                    break
+                except:
+                    retires+=1
+                    log.info('Attempt to encrypt file=%s',retires)
             # delete original file even if it was not encrypted
             os.remove(filepath)
         else:
