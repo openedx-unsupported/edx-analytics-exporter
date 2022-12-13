@@ -196,6 +196,7 @@ def encrypt_files(config, filenames, temp_directory=None):
             retires=0
             while retires<=MAX_TRIES_FOR_FILE_ENCRYPTION:
                 try:
+                    log.info('In try block to encrypt file')
                     with open(filepath,'rb') as input_file:
                         gpg.encrypt_file(
                         input_file,
@@ -204,6 +205,7 @@ def encrypt_files(config, filenames, temp_directory=None):
                         output=encrypted_filepath,
                         armor=False,
                     )
+                    log.info('After the TRY block going to breal')
                     break
                 except:
                     retires+=1
