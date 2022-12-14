@@ -82,7 +82,7 @@ def main(argv=None):
 
         with make_org_directory(config, organization) as destination:
             results = export_organization_data(config, destination)
-            encrypt_files(config, results)
+            #encrypt_files(config, results)
             archive = archive_directory(config, destination)
             upload_data(config, archive)
 
