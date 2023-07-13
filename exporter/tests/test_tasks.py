@@ -117,3 +117,16 @@ def test_course_task_get_filename_on_similar_names():
         kwargs['name'] = ('a' * 999) + 'b'
         file_name3 = os.path.basename(TestCourseTask.get_filename(**kwargs))
         assert len(set([file_name1, file_name2, file_name3])) == 3
+
+def test_normalize_value_with_null_character():
+    """
+    Test that a null character is removed from a string.
+    """
+    mysql_task = tasks.MysqlDumpQueryToTSV(
+        host='localhost',
+        username='root',
+        password='password',
+        database='test',
+        destination_filename='test.tsv',
+    )
+    assert mysql_task._normalize_value('abc\x00') == 'abc'
