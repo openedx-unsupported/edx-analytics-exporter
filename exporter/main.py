@@ -320,7 +320,7 @@ def get_all_courses(**kwargs):
         # Extract the time constraint option and calculate the end date that
         # should be used to limit the list of returned course IDs.
         # Please note that the default time constraint is 3 years
-        constraint = str(kwargs.get('time_constraint', '3'))
+        constraint = str(kwargs.get('time_constraint', '15'))
         try:
             constraint = int(constraint)
         except ValueError as e:
