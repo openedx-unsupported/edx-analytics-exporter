@@ -1,5 +1,18 @@
 edx-analytics-exporter
-===============
+======================
+
+# DEPRECATION NOTICE
+
+The Insights product and associated repositories are in the process of being 
+deprecated and removed from service. Details on the deprecation status and
+process can be found in the relevant [Github issue](https://github.com/openedx/public-engineering/issues/221).
+
+This repository may be archived and moved to the openedx-unsupported
+Github organization at any time.
+
+The following sections are for historical purposes only.
+
+---
 
 This is a set of analytics tasks to split selected database tables for export to
 partners. We use this at edX to deliver data packages to our
@@ -22,15 +35,3 @@ mkvirtualenv analytic-exporter
 pip install -r github_requirements.txt
 pip install -e .
 ```
-
-Running
-=======
-
-Sorry, we don't have docs for this yet -- we plan to address that as we 
-integrate this into the pipeline. 
-
-
-Contributions
-============
-
-Contributions welcome, though see note above. See https://open.edx.org/
