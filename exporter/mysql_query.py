@@ -18,7 +18,7 @@ class MysqlDumpQueryToTSV(object):
     def execute(self, query):
         with self._connect() as conn:
             try:
-                cursor = conn.cursor()
+                cursor = conn.cursor(buffered=True)
                 cursor.execute(query)
 
                 with open(self.destination_filename, 'w') as output_file:
