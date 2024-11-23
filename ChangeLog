@@ -1,0 +1,205 @@
+CHANGES
+=======
+
+* fix: replaced null character(\x00) to fix escaping error while writin… (#87)
+* build: Updating a missing workflow file \`add-depr-ticket-to-depr-board.yml\`
+* build: Creating a missing workflow file \`add-remove-label-on-comment.yml\`
+* build: Creating a missing workflow file \`self-assign-issue.yml\`
+
+0.12.3
+------
+
+* chore: fix python3 data encoding issue
+* chore: upgrade exporter from python2 to python3
+
+0.12.2
+------
+
+* feat: UserIdMapTask rebuilt on student\_anonymoususerid
+
+0.12.1
+------
+
+* fix: Use sys.exc\_info to get the latest exception details: type, value, traceback
+
+0.12.0
+------
+
+* fix: Limit file name lengths to system limits
+* fix: update path to .github workflows to read from openedx org
+
+0.11.1
+------
+
+* chore: Make the time\_constraint optional
+
+0.11.0
+------
+
+* feat: Use the time\_constraint configuration to limit the number of course IDs
+* chore: Switch to using the print function from \_\_future\_\_
+* build: add DEPR workflow automation
+* build: replace Travis with GitHub CI
+* build: use the organization commitlint check
+
+0.10.1
+------
+
+* chore: remove collect metrics (#55)
+
+0.10.0
+------
+
+* feat!: Remove phone\_number from the exporter
+
+0.9.0
+-----
+
+* feat!: Specify columns selected from the auth\_userprofile table, and ensure allow\_certificate is not included (#53)
+* Prevent the printing of secrets to the console when mongoexport fails
+* Pinned edx-ccx-keys and edx-opaque-keys for python 2.7 compatibility
+
+0.8.7
+-----
+
+* Update code to support newer version of platform
+* set up basic testing with travis and tox (#43)
+* handle course keys with non ascii characters (#41)
+
+0.8.6
+-----
+
+* Fix pipeline acceptance test. (#35)
+
+0.8.5
+-----
+
+* Add cohort membership to data export
+
+0.8.4
+-----
+
+* Fix course exporter
+
+0.8.3
+-----
+
+* removing django\_user as it is no longer used in the code base
+* Removing reliance on sudo to run admin commands
+
+0.8.2
+-----
+
+* Disabling InCourseReverificationTask as the underlying table is no longer available
+
+0.8.01
+------
+
+* Add org-config to the slave exporter job
+
+0.8.0
+-----
+
+* Remove org-config from the course\_export job. Slave jobs will be fed a single config file with everything needed
+* Revert "Revert "Add data-czar command line param""
+* Revert "Add data-czar command line param"
+* Add data-czar command line param
+
+0.7.23
+------
+
+* add output-prefix option to exporter-properties
+
+0.7.22
+------
+
+* EDUCATOR-1436 | Retry the opt-in task, add excluded-task option, more tests, some refactoring, decode course keys on the way in
+
+0.7.21
+------
+
+* pluck out offensive unicode courses
+* Operate in one chunk of email opt-in only
+* psutil is used by the exporter jobs
+* Added credit eligibility. (#21)
+* Export Course, Subsection Grades
+
+0.7.18
+------
+
+* DE-23 | Pass multiple orgs (from other\_names) to the email opt-in task when appropriate
+
+0.7.17
+------
+
+* DE-32 | Push elapsed time metrics to graphite
+
+0.7.16
+------
+
+* Add tasks for exporting course and forum roles
+
+0.7.15
+------
+
+* Add retry for copying from S3
+
+0.7.14
+------
+
+* Support different password for RDS on edge
+
+0.7.13
+------
+
+* Use retry logic when uploading data
+
+0.7.12
+------
+
+* Add support for retries of subprocesses
+
+0.7.11
+------
+
+* Call export\_olx with CMS settings
+
+0.7.10
+------
+
+* Use edx-ccx-keys instead of ccx-keys
+* Update edx-opaque-keys
+
+0.7.9
+-----
+
+* Fixed sytax issue
+* Include CCX courses in org exports
+* Change parameter name
+
+0.7.8
+-----
+
+* Course output is written to a single date
+
+0.7.7
+-----
+
+* Fix MySQL requirement
+
+0.7.6
+-----
+
+* Write ORA2 files to ora subdirectory
+* Add queries for all ORA2 tables
+* Use MySQL Connector/Python to dump table data
+
+0.7.5
+-----
+
+* Remove StackExchangeTask
+
+0.7.4
+-----
+
+* Initial commit in open sourced repo
